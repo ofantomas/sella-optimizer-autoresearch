@@ -2249,6 +2249,7 @@ class Internals(BaseInternals):
                     dbond2 = Bond((self.dinds[j], b2.indices[1]), b2.kwargs["ncvecs"])
                     dangle3 = dbond + dbond2
                     ddihedral = dangle1 + dangle3
+                    self.add_dihedral(ddihedral)
                     self.add_dummy_to_internals(j)
                     self.cons.add_dummy_to_internals(j)
                     for b1 in jbonds:
