@@ -2227,7 +2227,7 @@ class Internals(BaseInternals):
                         dx2 /= np.linalg.norm(dx2)
                         dpos = np.cross(dx1, dx2)
                         dpos_norm = np.linalg.norm(dpos)
-                        if dpos_norm < 0.01:
+                        if dpos_norm < 0.0001:
                             dim = np.argmin(np.abs(dx1))
                             dpos[:] = 0.0
                             dpos[dim] = 1.0
