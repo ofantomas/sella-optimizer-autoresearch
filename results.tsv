@@ -152,3 +152,4 @@ b01a8c7	1.214192	1.214192	1.000439	0.9960	1	discard	rho_inc 1.115 with relative 
 b32afa8	1.215435	1.215435	1.000439	0.9960	1	discard	rho_inc 1.105 with relative dummy ordering
 93ab675	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	remove fallback impropers after linear ordering
 a32131c	1.220672	1.220672	1.000423	0.9960	1	discard	skip bad curvature hessian updates
+daf0afc	1.214044	1.214044	1.000439	0.9960	1	discard	hessian symm 1 with relative dummy ordering
