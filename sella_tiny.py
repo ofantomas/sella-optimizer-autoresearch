@@ -2211,7 +2211,9 @@ class Internals(BaseInternals):
                     linear.append((b1, b2))
             if linear:
                 if len(jbonds) == 2:
-                    b1, b2 = sorted(jbonds, key=lambda x: x.calc(self.atoms))
+                    b1, b2 = sorted(
+                        jbonds, key=lambda x: x.calc(self.atoms), reverse=True
+                    )
                     if self.dinds[j] < 0:
                         self.dinds[j] = self.natoms + self.ndummies
                         dx1 = -b1.calc_vec(self.atoms)
