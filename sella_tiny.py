@@ -2309,14 +2309,28 @@ class Internals(BaseInternals):
             if center in dihedral_centers:
                 continue
             cell = np.asarray(self.atoms.cell)
-            ordered = sorted(
-                neighbors[center],
-                key=lambda item: np.linalg.norm(
-                    self.atoms.positions[item[0]]
-                    + item[1] @ cell
+            vecs = []
+            for nidx, ncvec in neighbors[center]:
+                vec = (
+                    self.atoms.positions[nidx]
+                    + ncvec @ cell
                     - self.atoms.positions[center]
-                ),
-            )
+                )
+                norm = np.linalg.norm(vec)
+                if norm < 1e-12:
+                    break
+                vecs.append(vec / norm)
+            if len(vecs) != 3:
+                continue
+            scores = []
+            for idx, vec in enumerate(vecs):
+                score = 0.0
+                for jdx, other in enumerate(vecs):
+                    if idx != jdx:
+                        score += np.arccos(np.clip(vec @ other, -1.0, 1.0))
+                scores.append(score)
+            order = np.argsort(scores)
+            ordered = [neighbors[center][idx] for idx in order]
             n1, ncvec1 = ordered[2]
             n0, ncvec0 = ordered[0]
             n2, ncvec2 = ordered[1]
