@@ -2187,9 +2187,6 @@ class Internals(BaseInternals):
                     continue
                 self.add_translation(group)
                 self.add_rotation(group)
-        for i, nbi in enumerate(nbonds):
-            if nbi >= nbond_cart_thr:
-                self.add_translation(i)
 
     def find_all_angles(self) -> None:
         bonds = [[] for _ in range(self.natoms)]
