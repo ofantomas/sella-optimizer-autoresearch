@@ -2317,9 +2317,9 @@ class Internals(BaseInternals):
                     - self.atoms.positions[center]
                 ),
             )
-            n1, ncvec1 = ordered[1]
+            n1, ncvec1 = ordered[2]
             n0, ncvec0 = ordered[0]
-            n2, ncvec2 = ordered[2]
+            n2, ncvec2 = ordered[1]
             imp_ncvecs = (-ncvec0, ncvec1, ncvec2 - ncvec1)
             try:
                 self.add_dihedral((n0, center, n1, n2), imp_ncvecs)
