@@ -120,3 +120,4 @@ fb15a48	1.256256	1.256256	1.000970	0.9960	1	discard	curvature-weighted internal 
 ca49299	1.215729	1.215729	1.000439	0.9960	1	discard	bounded bad internal pre-retry
 f657447	1.215444	1.215444	1.000439	0.9960	1	keep	fallback impropers trigonal only
 036912a	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	remove fallback impropers
+56f8ceb	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	planar fallback impropers
