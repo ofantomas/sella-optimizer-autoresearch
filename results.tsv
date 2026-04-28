@@ -147,3 +147,4 @@ b37c071	1.214044	1.214044	1.000439	0.9960	1	discard	covalent-excess linear dummy
 e302698	1.216035	1.216035	1.000439	0.9960	1	discard	delta0 0.1238 with relative dummy ordering
 ad3a121	1.217576	1.217576	1.000435	0.9960	1	discard	delta0 0.1242 with relative dummy ordering
 c0b7a7d	1.396372	1.396372	1.000401	0.9880	1	discard	fixed dihedral hessian guess
+0dcb145	1.267434	1.267434	1.000438	0.9920	1	discard	linear dummy radius 0.75
