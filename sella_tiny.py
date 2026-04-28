@@ -3035,7 +3035,7 @@ class BaseRestrictedStep:
 class MaxInternalStep(BaseRestrictedStep):
     synonyms = ["mis", "max internal step"]
 
-    def __init__(self, pes, *args, wx=1.0, wb=1.0, wa=1.1, wd=1.0, wo=1.0, **kwargs):
+    def __init__(self, pes, *args, wx=1.0, wb=1.0, wa=1.08, wd=1.0, wo=1.0, **kwargs):
         if pes.int is None:
             raise ValueError(
                 f"Internal coordinates are required for the {self.__class__.__name__} trust region method"
