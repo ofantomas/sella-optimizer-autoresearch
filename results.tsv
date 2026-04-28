@@ -127,3 +127,4 @@ f657447	1.215444	1.215444	1.000439	0.9960	1	keep	fallback impropers trigonal onl
 5c4dc96	1.215044	1.215044	1.000439	0.9960	1	discard	swapped longest-axis fallback impropers
 3a10188	1.215357	1.215357	1.000439	0.9960	1	discard	no high-rho shrink with longest impropers
 67e3171	1.215044	1.215044	1.000439	0.9960	1	discard	bond scale 1.235 with longest impropers
+d2a272c	1.215044	1.215044	1.000439	0.9960	1	discard	relative-stretch fallback improper axis
