@@ -155,3 +155,4 @@ a32131c	1.220672	1.220672	1.000423	0.9960	1	discard	skip bad curvature hessian u
 daf0afc	1.214044	1.214044	1.000439	0.9960	1	discard	hessian symm 1 with relative dummy ordering
 9a4d6e1	1.215130	1.215130	1.000427	0.9960	1	discard	cap internal trust radius 0.3
 90732f1	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	omit linear dummy orientation dihedral
+c77a0b9	1.222097	1.222097	1.000848	0.9920	1	discard	sigma_inc 1.415 with relative dummy ordering
