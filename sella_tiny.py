@@ -1927,7 +1927,7 @@ class Internals(BaseInternals):
         self,
         atoms: Atoms,
         dummies: Atoms = None,
-        atol: float = 10.0,
+        atol: float = 5.0,
         dinds: np.ndarray = None,
         cons: Constraints = None,
         allow_fragments: bool = False,
