@@ -2217,7 +2217,7 @@ class Internals(BaseInternals):
                         return bond.calc(self.all_atoms) / rcov
 
                     b1, b2 = sorted(
-                        jbonds, key=bond_stretch, reverse=True
+                        jbonds, key=bond_stretch
                     )
                     if self.dinds[j] < 0:
                         self.dinds[j] = self.natoms + self.ndummies
