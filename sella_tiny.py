@@ -2235,7 +2235,7 @@ class Internals(BaseInternals):
                             dpos /= np.linalg.norm(dpos)
                         else:
                             dpos /= dpos_norm
-                        dpos = self.atoms.positions[j] + 0.75 * dpos
+                        dpos += self.atoms.positions[j]
                         self.dummies += Atom("X", dpos)
                     dbond = Bond((j, self.dinds[j]))
                     self.cons.fix_bond(dbond, replace_ok=False)
