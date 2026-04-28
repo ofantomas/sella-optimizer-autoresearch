@@ -165,6 +165,8 @@ class ApproximateHessian(LinearOperator):
             B = np.zeros(self.shape, dtype=self.dtype)
         else:
             B = self.B.copy()
+        if self.initialized and dx @ dg <= 1e-12:
+            return
         if not self.initialized:
             self.initialized = True
             dx_cart = dx[: self.ncart]
