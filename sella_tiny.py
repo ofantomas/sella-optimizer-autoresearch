@@ -3265,7 +3265,7 @@ class Sella(Optimizer):
             return
         if rho is None:
             pass
-        elif rho < 1.0 / self.rho_dec or rho > self.rho_dec:
+        elif rho < 1.0 / self.rho_dec:
             self.delta = max(smag * self.sigma_dec, self.delta_min)
         elif 1.0 / self.rho_inc < rho < self.rho_inc:
             self.delta = max(self.sigma_inc * smag, self.delta)
