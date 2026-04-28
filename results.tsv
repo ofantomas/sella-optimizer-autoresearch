@@ -151,3 +151,4 @@ c0b7a7d	1.396372	1.396372	1.000401	0.9880	1	discard	fixed dihedral hessian guess
 b01a8c7	1.214192	1.214192	1.000439	0.9960	1	discard	rho_inc 1.115 with relative dummy ordering
 b32afa8	1.215435	1.215435	1.000439	0.9960	1	discard	rho_inc 1.105 with relative dummy ordering
 93ab675	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	remove fallback impropers after linear ordering
+a32131c	1.220672	1.220672	1.000423	0.9960	1	discard	skip bad curvature hessian updates
