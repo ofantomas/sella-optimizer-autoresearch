@@ -121,3 +121,4 @@ ca49299	1.215729	1.215729	1.000439	0.9960	1	discard	bounded bad internal pre-ret
 f657447	1.215444	1.215444	1.000439	0.9960	1	keep	fallback impropers trigonal only
 036912a	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	remove fallback impropers
 56f8ceb	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	planar fallback impropers
+4f69120	1.215110	1.215110	1.000439	0.9960	1	keep	shortest-axis fallback impropers
