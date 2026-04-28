@@ -1,0 +1,21 @@
+name: sella-autoresearch
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - numpy
+  - scipy
+  - ase
+  - jax
+  - jaxlib
+  - openmm
+  - tblite
+  - tblite-python
+  - redis-py
+  - cloudpickle
+  - psutil
+  - pyyaml
+  - pytest
+  - pip
+  - pip:
+      - fakeredis

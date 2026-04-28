@@ -1,0 +1,9 @@
+[project]
+name = "sella-optimizer-autoresearch"
+version = "0.1.0"
+description = "Autoresearch harness for improving the sella_tiny optimizer"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
