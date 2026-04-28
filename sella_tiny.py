@@ -2645,7 +2645,8 @@ class PES:
             ratio = None
         else:
             ratio = df_actual / df_pred
-        self._update_H(dx_final, dg_actual)
+        if ratio is None or ratio >= 0.0:
+            self._update_H(dx_final, dg_actual)
         if diag:
             raise ValueError("sella_minimal does not support eig=True diagonalization.")
         return ratio
