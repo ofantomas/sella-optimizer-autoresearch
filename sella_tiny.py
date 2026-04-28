@@ -2411,25 +2411,9 @@ class Internals(BaseInternals):
         self,
         dihedral: Dihedral,
         nbonds: np.ndarray,
-        At: float = 0.0015,
-        Bt: float = 14.0,
-        Ct: float = 2.85,
-        Dt: float = 0.57,
-        Et: float = 4.0,
+        At: float = 0.023,
     ) -> float:
-        _, bbc = dihedral.split()[0].split()
-        idx = np.asarray(bbc.indices, dtype=np.int32)
-        rcovbc = covalent_radii[self.all_atoms.numbers[idx]].sum()
-        rbc = bbc.calc(self.all_atoms)
-        L = nbonds[idx].sum() - 2
-        h0 = (
-            At
-            + Bt
-            * L**Dt
-            * np.exp(-Ct * (rbc - rcovbc) / units.Bohr)
-            / (rbc * rcovbc / units.Bohr**2) ** Et
-        )
-        return h0 * units.Hartree
+        return At * units.Hartree
 
     def guess_hessian(self, h0cart=70.0) -> np.ndarray:
         nbonds = np.zeros(len(self.all_atoms), dtype=np.int32)
