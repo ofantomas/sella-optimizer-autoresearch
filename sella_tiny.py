@@ -2322,6 +2322,10 @@ class Internals(BaseInternals):
                     self.atoms.positions[item[0]]
                     + item[1] @ cell
                     - self.atoms.positions[center]
+                )
+                / (
+                    covalent_radii[self.atoms.numbers[center]]
+                    + covalent_radii[self.atoms.numbers[item[0]]]
                 ),
             )
             n1, ncvec1 = ordered[2]
