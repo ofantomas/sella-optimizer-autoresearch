@@ -123,3 +123,4 @@ f657447	1.215444	1.215444	1.000439	0.9960	1	keep	fallback impropers trigonal onl
 56f8ceb	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	planar fallback impropers
 4f69120	1.215110	1.215110	1.000439	0.9960	1	keep	shortest-axis fallback impropers
 1fbed9a	1.215044	1.215044	1.000439	0.9960	1	keep	longest-axis fallback impropers
+81b3f59	1.215444	1.215444	1.000439	0.9960	1	discard	middle-axis fallback impropers
