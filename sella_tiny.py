@@ -3200,6 +3200,7 @@ class Sella(Optimizer):
         self.ord = order
         self.eta = eta
         self.delta_min = self.eta
+        self.delta_max = 0.3
         self.constraints_tol = constraints_tol
         self.rho = 1.0
         self.initialized = False
@@ -3275,7 +3276,7 @@ class Sella(Optimizer):
         elif rho < 1.0 / self.rho_dec or rho > self.rho_dec:
             self.delta = max(smag * self.sigma_dec, self.delta_min)
         elif 1.0 / self.rho_inc < rho < self.rho_inc:
-            self.delta = max(self.sigma_inc * smag, self.delta)
+            self.delta = min(max(self.sigma_inc * smag, self.delta), self.delta_max)
         self.rho = rho
         if self.rho is None:
             self.rho = 1.0
