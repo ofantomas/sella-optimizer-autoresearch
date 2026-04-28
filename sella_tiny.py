@@ -2211,8 +2211,13 @@ class Internals(BaseInternals):
                     linear.append((b1, b2))
             if linear:
                 if len(jbonds) == 2:
+                    def bond_stretch(bond):
+                        idx = np.asarray(bond.indices, dtype=np.int32)
+                        rcov = covalent_radii[self.all_atoms.numbers[idx]].sum()
+                        return bond.calc(self.all_atoms) / rcov
+
                     b1, b2 = sorted(
-                        jbonds, key=lambda x: x.calc(self.atoms), reverse=True
+                        jbonds, key=bond_stretch, reverse=True
                     )
                     if self.dinds[j] < 0:
                         self.dinds[j] = self.natoms + self.ndummies
