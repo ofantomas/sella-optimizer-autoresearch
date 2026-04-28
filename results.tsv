@@ -1,0 +1,117 @@
+commit	fitness	mean_rel_steps	mean_rel_energy	converged	is_valid	status	description
+d04be35	1.266096	1.266096	1.000240	0.9920	1	keep	baseline
+b5f9907	1.246059	1.246059	1.000397	0.9920	1	keep	delta0 0.12
+6a2bc39	1.262369	1.262369	1.001091	0.9920	1	discard	delta0 0.14
+70c5367	1.245612	1.245612	1.000442	0.9960	1	keep	delta0 0.13
+06f8793	1.243524	1.243524	1.000736	0.9960	1	keep	sigma_inc 1.2
+a931ce3	1.236725	1.236725	1.000430	0.9960	1	keep	sigma_inc 1.3
+164fec6	1.238193	1.238193	1.000740	0.9960	1	discard	sigma_inc 1.5
+a9c5941	1.232405	1.232405	1.000669	0.9960	1	keep	sigma_inc 1.4
+204256f	1.235834	1.235834	1.000725	0.9960	1	discard	sigma_inc 1.45
+abc3d55	1.236694	1.236694	1.000387	0.9960	1	discard	sigma_dec 0.8
+01c6901	1.237174	1.237174	1.000687	0.9960	1	discard	sigma_dec 0.95
+fe7e0a5	1.232309	1.232309	1.000400	0.9920	1	keep	rho_inc 1.1
+e625f96	1.250774	1.250774	1.001268	0.9960	1	discard	rho_inc 1.2
+72f1804	1.234829	1.234829	1.000880	0.9960	1	discard	delta0 0.12 with growth
+08346df	1.224687	1.224687	1.000477	0.9920	1	keep	delta0 0.125
+57e810a	1.230748	1.230748	1.000722	0.9920	1	discard	delta0 0.1275
+e3e7a3d	1.234556	1.234556	1.001539	0.9960	1	discard	delta0 0.1225
+c39d89e	1.225097	1.225097	1.000451	0.9920	1	discard	rho_inc 1.075
+c7f9e6b	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	rho_inc 1.125
+bdeb63a	1.227038	1.227038	1.000719	0.9960	1	discard	sigma_inc 1.35
+15a59a2	1.234237	1.234237	1.001147	0.9960	1	discard	sigma_inc 1.38
+3edf705	1.226780	1.226780	1.000533	0.9920	1	discard	sigma_inc 1.42
+8d46973	1.225907	1.225907	1.000471	0.9920	1	discard	rho_dec 10
+1b6d30c	1.237992	1.237992	1.001160	0.9960	1	discard	angular weights 0.9
+f6013ef	1.237864	1.237864	1.001007	0.9960	1	discard	bond weight 0.9
+0fa596a	1.229220	1.229220	1.000732	0.9960	1	discard	sigma_dec 0.85
+466db41	1.226095	1.226095	1.000419	0.9920	1	discard	sigma_dec 0.92
+5b0863b	1.236209	1.236209	1.001463	0.9960	1	discard	hessian scale 0.9
+587e39a	1.256794	1.256794	1.000836	0.9960	1	discard	hessian scale 1.1
+ee0003f	1.242399	1.242399	1.001140	0.9960	1	discard	delta0 0.126
+2b7de84	1.223559	1.223559	1.000469	0.9960	1	keep	delta0 0.124
+0b96a37	1.223732	1.223732	1.000507	0.9920	1	discard	delta0 0.1235 post-merge HEAD
+d16962e	1.223795	1.223795	1.000469	0.9960	1	discard	rho_inc 1.115 narrower good-step band
+5445f33	1.223231	1.223231	1.000469	0.9960	1	keep	rho_dec 130
+b38e5c1	1.223231	1.223231	1.000469	0.9960	1	discard	rho_dec 170
+e4ba78f	1.224021	1.224021	1.000461	0.9960	1	discard	delta0 0.1238 with rho_dec 130
+ecfbc79	1.224061	1.224061	1.000474	0.9960	1	discard	delta0 0.1242 with rho_dec 130
+09dbb46	1.223385	1.223385	1.000469	0.9960	1	discard	rho_dec 120
+91e3f06	1.243412	1.243412	1.001232	0.9960	1	discard	asymmetric trust growth upper 1.25
+0060acb	1.223231	1.223231	1.000469	0.9960	1	discard	hessian symm 1
+1f291c3	3.491910	3.491910	1.000526	0.9200	1	discard	respect hessian initialized flag
+2e0371c	1.223300	1.223300	1.000469	0.9960	1	discard	bond detection scale 1.2
+b1b2106	1.224058	1.224058	1.000469	0.9960	1	discard	bond detection scale 1.3
+77c3a8a	1.223231	1.223231	1.000469	0.9960	1	discard	rho_dec 125
+5041b43	1.221242	1.221242	1.000474	0.9920	1	keep	sigma_inc 1.41 with rho_dec 130
+2671b6c	1.226223	1.226223	1.000481	0.9960	1	discard	sigma_inc 1.42 with rho_dec 130
+22946bb	1.228294	1.228294	1.000825	0.9920	1	discard	sigma_inc 1.415 with rho_dec 130
+90be8f0	1.227809	1.227809	1.000867	0.9960	1	discard	sigma_inc 1.405 with rho_dec 130
+accae63	1.221242	1.221242	1.000474	0.9920	1	discard	rho_dec 125 with sigma_inc 1.41
+06f1b7f	1.221359	1.221359	1.000468	0.9960	1	discard	sigma_dec 0.91 with sigma_inc 1.41
+aa6eff5	1.226101	1.226101	1.000485	0.9960	1	discard	sigma_dec 0.89 with sigma_inc 1.41
+81e722a	1.223197	1.223197	1.000503	0.9920	1	discard	delta0 0.1239 with sigma_inc 1.41
+75d1318	1.225324	1.225324	1.000813	0.9920	1	discard	delta0 0.1241 with sigma_inc 1.41
+d91daff	1.223113	1.223113	1.000478	0.9920	1	discard	rho_inc 1.095 with sigma_inc 1.41
+74085ff	1.220293	1.220293	1.000474	0.9920	1	keep	rho_inc 1.105 with sigma_inc 1.41
+bd7ed50	1.219016	1.219016	1.000474	0.9920	1	keep	rho_inc 1.11 with sigma_inc 1.41
+ff2b720	1.219938	1.219938	1.000474	0.9920	1	discard	rho_inc 1.115 with sigma_inc 1.41
+f637272	1.219574	1.219574	1.000474	0.9920	1	discard	rho_inc 1.1125 with sigma_inc 1.41
+33a25fa	1.219574	1.219574	1.000474	0.9920	1	discard	rho_inc 1.111 with sigma_inc 1.41
+f375685	1.219397	1.219397	1.000474	0.9920	1	discard	rho_inc 1.109 with sigma_inc 1.41
+54a9597	1.219016	1.219016	1.000474	0.9920	1	discard	rho_dec 125 with rho_inc 1.11
+0078d1e	1.227275	1.227275	1.000892	0.9920	1	discard	sigma_inc 1.412 with rho_inc 1.11
+962ab56	1.225503	1.225503	1.000840	0.9960	1	discard	sigma_inc 1.408 with rho_inc 1.11
+b47faa4	1.221377	1.221377	1.000468	0.9920	1	discard	delta0 0.12395 with rho_inc 1.11
+6b6b5c9	1.222754	1.222754	1.000497	0.9920	1	discard	delta0 0.12405 with rho_inc 1.11
+889a7c1	1.219016	1.219016	1.000474	0.9920	1	discard	hessian symm 1 with tuned trust
+0900de7	1.242065	1.242065	1.001251	0.9960	1	discard	dihedral trust weight 0.9
+c81a013	1.239676	1.239676	1.000709	0.9920	1	discard	dihedral trust weight 1.1
+9c97614	1.242487	1.242487	1.001278	0.9920	1	discard	sigma_dec 1.0 with tuned trust
+3d9ef25	1.220415	1.220415	1.000488	0.9920	1	discard	sigma_dec 0.905 with tuned trust
+1cef768	1.217938	1.217938	1.000469	0.9920	1	keep	linear angle cutoff 10
+4f46da7	1.217581	1.217581	1.000467	0.9960	1	keep	linear angle cutoff 5
+11f082f	1.220876	1.220876	1.000467	0.9960	1	discard	linear angle cutoff 2.5
+7a3a2fc	1.219052	1.219052	1.000466	0.9960	1	discard	linear angle cutoff 7.5
+df3290b	1.219517	1.219517	1.000467	0.9960	1	discard	linear angle cutoff 4
+d4a8f0b	1.218968	1.218968	1.000467	0.9960	1	discard	linear angle cutoff 6
+45e2f28	1.218504	1.218504	1.000467	0.9960	1	discard	rho_inc 1.115 with angle cutoff 5
+75ec4ed	1.219307	1.219307	1.000467	0.9960	1	discard	rho_inc 1.105 with angle cutoff 5
+ff457d4	1.226551	1.226551	1.000884	0.9920	1	discard	sigma_inc 1.412 with angle cutoff 5
+d30a439	1.218340	1.218340	1.000467	0.9960	1	discard	bond scale 1.2 with angle cutoff 5
+4590c4c	1.217589	1.217589	1.000467	0.9960	1	discard	bond scale 1.225 with angle cutoff 5
+9d31aad	1.217589	1.217589	1.000467	0.9960	1	discard	bond scale 1.235 with angle cutoff 5
+88e3cda	1.224618	1.224618	1.000887	0.9920	1	discard	hessian scale 0.95 with angle cutoff 5
+dda2a95	1.218248	1.218248	1.000467	0.9960	1	discard	linear angle cutoff 5.5
+a860cae	1.218245	1.218245	1.000467	0.9960	1	discard	linear angle cutoff 4.5
+d8442b3	1.217581	1.217581	1.000467	0.9960	1	discard	rho_dec 125 with angle cutoff 5
+ccccdc0	1.217735	1.217735	1.000467	0.9960	1	discard	rho_dec 120 with angle cutoff 5
+7639d5d	1.217581	1.217581	1.000467	0.9960	1	discard	quasi-newton curvature floor 1e-6
+fb44d25	1.220763	1.220763	1.000467	0.9960	1	discard	quasi-newton curvature floor 1e-4
+5157fe4	1.219184	1.219184	1.000467	0.9960	1	discard	relaxed bad angle threshold
+007dfa1	1000.000000	1.327619	0.998050	0.9720	0	invalid	stricter bad angle threshold
+64542c6	1.217730	1.217730	1.000467	0.9960	1	discard	shrink trust after bad internal rebuild
+8e660f8	1.217226	1.217226	1.000440	0.9960	1	keep	angle trust weight 1.1 with cutoff 5
+0a902ba	1.218483	1.218483	1.000471	0.9960	1	discard	angle trust weight 1.2 with cutoff 5
+81c4619	1.217544	1.217544	1.000469	0.9960	1	discard	angle trust weight 1.05 with cutoff 5
+e38c58a	1.217981	1.217981	1.000441	0.9960	1	discard	angle trust weight 1.12 with cutoff 5
+2f64043	1.215710	1.215710	1.000439	0.9960	1	keep	angle trust weight 1.08 with cutoff 5
+189ab5e	1.216238	1.216238	1.000441	0.9960	1	discard	angle trust weight 1.07 with cutoff 5
+3c45409	1.218175	1.218175	1.000439	0.9960	1	discard	angle trust weight 1.09 with cutoff 5
+f080d07	1.216987	1.216987	1.000438	0.9960	1	discard	angle trust weight 1.075 with cutoff 5
+d36b87f	1.215859	1.215859	1.000439	0.9960	1	discard	rho_inc 1.115 with angle weight 1.08
+b04e385	1.217501	1.217501	1.000439	0.9960	1	discard	rho_inc 1.105 with angle weight 1.08
+df7f836	1.222582	1.222582	1.000811	0.9960	1	discard	sigma_inc 1.405 with angle weight 1.08
+5db5ae7	1.217246	1.217246	1.000454	0.9960	1	discard	sigma_inc 1.411 with angle weight 1.08
+13ba276	1.218565	1.218565	1.000441	0.9960	1	discard	delta0 0.12395 with angle weight 1.08
+61375b6	1.216020	1.216020	1.000439	0.9960	1	discard	linear angle cutoff 4.5 with angle weight 1.08
+f839c70	1.216666	1.216666	1.000439	0.9960	1	discard	linear angle cutoff 5.5 with angle weight 1.08
+7a40b07	1.215444	1.215444	1.000439	0.9960	1	keep	bond scale 1.225 with angle weight 1.08
+be5d2f5	1.215444	1.215444	1.000439	0.9960	1	discard	bond scale 1.235 with angle weight 1.08
+9ce6277	1.216194	1.216194	1.000439	0.9960	1	discard	bond scale 1.2 with angle weight 1.08
+94a7f8f	1.216720	1.216720	1.000438	0.9960	1	discard	angle weight 1.075 with bond scale 1.225
+51330e1	1.216381	1.216381	1.000441	0.9960	1	discard	angle weight 1.085 with bond scale 1.225
+2f0bc5d	1.215757	1.215757	1.000439	0.9920	1	discard	bond scale 1.215 with angle weight 1.08
+8a65555	1.215710	1.215710	1.000439	0.9960	1	discard	bond scale 1.245 with angle weight 1.08
+fb15a48	1.256256	1.256256	1.000970	0.9960	1	discard	curvature-weighted internal trust
+5feb60a	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	pre-retry bad internal steps hung worker tasks
