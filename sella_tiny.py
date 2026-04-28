@@ -2322,7 +2322,9 @@ class Internals(BaseInternals):
             n2, ncvec2 = ordered[1]
             imp_ncvecs = (-ncvec0, ncvec1, ncvec2 - ncvec1)
             try:
-                self.add_dihedral((n0, center, n1, n2), imp_ncvecs)
+                improper = Dihedral((n0, center, n1, n2), imp_ncvecs)
+                improper.fallback_improper = True
+                self.add_dihedral(improper)
             except DuplicateInternalError:
                 pass
 
@@ -3096,7 +3098,10 @@ class MaxInternalStep(BaseRestrictedStep):
             [self.wx] * self.pes.int.ntrans
             + [self.wb] * self.pes.int.nbonds
             + [self.wa] * self.pes.int.nangles
-            + [self.wd] * self.pes.int.ndihedrals
+            + [
+                self.wa if getattr(dihedral, "fallback_improper", False) else self.wd
+                for dihedral in self.pes.int.internals["dihedrals"]
+            ]
             + [self.wo] * self.pes.int.nother
             + [self.wx] * self.pes.int.nrotations
         )
