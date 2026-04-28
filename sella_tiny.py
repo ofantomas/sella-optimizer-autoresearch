@@ -2304,7 +2304,7 @@ class Internals(BaseInternals):
             if j < self.natoms:
                 neighbors[j].append((int(i), -bond.kwargs["ncvecs"][0]))
         for center in range(self.natoms):
-            if len(neighbors[center]) != 3:
+            if len(neighbors[center]) not in (3, 4):
                 continue
             if center in dihedral_centers:
                 continue
