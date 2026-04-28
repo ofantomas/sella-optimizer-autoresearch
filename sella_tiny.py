@@ -2126,7 +2126,7 @@ class Internals(BaseInternals):
                 Internals.flood_fill(j, nbonds, c10y, labels, label)
 
     def find_all_bonds(
-        self, nbond_cart_thr: int = 6, max_bonds: int = 20, scale: float = 1.215
+        self, nbond_cart_thr: int = 6, max_bonds: int = 20, scale: float = 1.225
     ) -> None:
         rcov = covalent_radii[self.atoms.numbers]
         nbonds = np.zeros(self.natoms, dtype=np.int32)
