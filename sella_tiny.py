@@ -2322,9 +2322,7 @@ class Internals(BaseInternals):
             n2, ncvec2 = ordered[1]
             imp_ncvecs = (-ncvec0, ncvec1, ncvec2 - ncvec1)
             try:
-                improper = Dihedral((n0, center, n1, n2), imp_ncvecs)
-                improper.fallback_improper = True
-                self.add_dihedral(improper)
+                self.add_dihedral((n0, center, n1, n2), imp_ncvecs)
             except DuplicateInternalError:
                 pass
 
@@ -2424,8 +2422,6 @@ class Internals(BaseInternals):
             * np.exp(-Ct * (rbc - rcovbc) / units.Bohr)
             / (rbc * rcovbc / units.Bohr**2) ** Et
         )
-        if getattr(dihedral, "fallback_improper", False):
-            h0 *= 2.0
         return h0 * units.Hartree
 
     def guess_hessian(self, h0cart=70.0) -> np.ndarray:
