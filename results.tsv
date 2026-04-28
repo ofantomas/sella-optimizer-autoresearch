@@ -140,3 +140,4 @@ e1ccfd7	1.215110	1.215110	1.000439	0.9960	1	discard	angular-axis fallback improp
 b37c071	1.214044	1.214044	1.000439	0.9960	1	discard	covalent-excess linear dummy internals
 28ad5b3	1.250764	1.250764	1.000733	0.9960	1	discard	bond-length linear dummy radius
 1c4ebe0	1.214357	1.214357	1.000439	0.9920	1	discard	bond scale 1.215 with linear ordering
+742eb9f	1.214044	1.214044	1.000439	0.9960	1	discard	relative fallback axis with linear ordering
