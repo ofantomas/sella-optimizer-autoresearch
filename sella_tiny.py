@@ -102,7 +102,7 @@ class ApproximateHessian(LinearOperator):
         ncart: int,
         B0: np.ndarray = None,
         update_method: str = "TS-BFGS",
-        symm: int = 1,
+        symm: int = 2,
         initialized: bool = False,
     ) -> None:
         self.dim = dim
