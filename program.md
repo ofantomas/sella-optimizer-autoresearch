@@ -30,6 +30,15 @@ mean_rel_energy < 0.999
 
 This is the most important constraint. Do not keep a faster optimizer if it loses energy quality. Invalid runs receive `fitness = 1000.0` and must be discarded, no matter how low their raw step count looks.
 
+## Search Mandate
+
+You are not limited to hyperparameter tuning. You should investigate both:
+
+- Optimal hyperparameter configurations for the existing optimizer structure.
+- New and creative optimizer ideas, including algorithmic changes to step prediction, Hessian handling, trust-region behavior, internal-coordinate treatment, acceptance logic, and convergence behavior.
+
+Treat hyperparameters as one search direction, not the whole search space. Strong experiments can be conservative parameter sweeps, principled algorithmic changes, or creative simplifications. The simplicity criterion below remains intact: new ideas must still earn their complexity through valid, measurable improvements.
+
 ## Simplicity Criterion
 
 All else being equal, simpler is better. A small valid step-count improvement that adds ugly, brittle, or hard-to-reason-about optimizer complexity is usually not worth keeping. Conversely, removing code and getting equal or better valid fitness is a strong simplification win.
@@ -127,4 +136,4 @@ Use `status=keep` for a new best valid result, `discard` for valid but worse, an
 
 ## Search Hints
 
-High-value areas in `sella_tiny.py` include trust-radius adaptation, Hessian update stability, initialization, line/search step restrictions, and internal-coordinate handling. Prefer simple changes that improve robustness and reduce force calls together. Avoid broad exception swallowing or fallbacks that hide real failures.
+High-value areas in `sella_tiny.py` include trust-radius adaptation, Hessian update stability, initialization, line/search step restrictions, and internal-coordinate handling. Explore both HP configurations and genuinely new optimizer mechanisms. Prefer simple changes that improve robustness and reduce force calls together. Avoid broad exception swallowing or fallbacks that hide real failures.
