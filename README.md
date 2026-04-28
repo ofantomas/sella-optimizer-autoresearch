@@ -25,7 +25,7 @@ conda env create -f environment.yml
 conda activate sella-autoresearch
 ```
 
-If you already have the original validation environment, use it instead as long as it includes `ase`, `jax`, `numpy`, `scipy`, `tblite`, `redis`, and `cloudpickle`.
+If you already have the original validation environment, use it instead as long as it includes `ase`, `jax`, `numpy`, `scipy`, `tblite`, `redis`, `cloudpickle`, and a `redis-server` executable.
 
 ## Run Locally
 
