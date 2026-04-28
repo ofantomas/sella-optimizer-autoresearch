@@ -132,3 +132,4 @@ e1ccfd7	1.215110	1.215110	1.000439	0.9960	1	discard	angular-axis fallback improp
 4ffdfff	1.215044	1.215044	1.000439	0.9960	1	discard	four-connected longest-axis fallback impropers
 4855c8e	1.215044	1.215044	1.000439	0.9960	1	discard	soft fallback improper hessian
 6aa8188	1.215044	1.215044	1.000439	0.9960	1	discard	stiff fallback improper hessian
+74f0e67	1.225682	1.225682	1.000833	0.9960	1	discard	grow on underpredicted successes
