@@ -160,3 +160,4 @@ be3f44b	1.220915	1.220915	1.000811	0.9960	1	discard	sigma_inc 1.405 with relativ
 fe0917b	1.214044	1.214044	1.000439	0.9960	1	discard	rho_dec 140 with relative dummy ordering
 e8320bc	1.214340	1.214340	1.000439	0.9960	1	discard	high coordination cartesian translations
 c8947e4	1.254258	1.254258	1.001070	0.9920	1	discard	cartesian help at linear dummy centers
+31d4c02	1.226179	1.226179	1.000436	0.9960	1	discard	linear dummy fallback threshold 0.01
