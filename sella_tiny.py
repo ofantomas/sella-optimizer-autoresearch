@@ -2225,7 +2225,7 @@ class Internals(BaseInternals):
                         dx1 /= np.linalg.norm(dx1)
                         dx2 = b2.calc_vec(self.atoms)
                         dx2 /= np.linalg.norm(dx2)
-                        dpos = np.cross(dx1, dx2)
+                        dpos = -np.cross(dx1, dx2)
                         dpos_norm = np.linalg.norm(dpos)
                         if dpos_norm < 0.0001:
                             dim = np.argmin(np.abs(dx1))
