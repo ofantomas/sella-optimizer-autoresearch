@@ -143,3 +143,4 @@ b37c071	1.214044	1.214044	1.000439	0.9960	1	discard	covalent-excess linear dummy
 742eb9f	1.214044	1.214044	1.000439	0.9960	1	discard	relative fallback axis with linear ordering
 3ec0a2e	1.214353	1.214353	1.000439	0.9960	1	discard	linear cutoff 4.5 with relative dummy ordering
 9e69d5b	1.214999	1.214999	1.000439	0.9960	1	discard	linear cutoff 5.5 with relative dummy ordering
+3046ebf	1.214517	1.214517	1.000439	0.9960	1	discard	flipped linear dummy handedness
