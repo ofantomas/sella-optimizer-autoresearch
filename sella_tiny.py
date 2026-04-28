@@ -2252,7 +2252,6 @@ class Internals(BaseInternals):
                     self.add_dihedral(ddihedral)
                     self.add_dummy_to_internals(j)
                     self.cons.add_dummy_to_internals(j)
-                    self.add_translation(j)
                     for b1 in jbonds:
                         new = b1 + dbond
                         assert new.indices[1] == j
