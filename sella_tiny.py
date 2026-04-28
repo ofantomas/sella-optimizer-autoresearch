@@ -2291,6 +2291,32 @@ class Internals(BaseInternals):
                 self.add_dihedral(new)
             except DuplicateInternalError:
                 continue
+        dihedral_centers = set()
+        for d, a in zip(self.internals["dihedrals"], self._active["dihedrals"]):
+            if a:
+                dihedral_centers.add(int(d.indices[1]))
+                dihedral_centers.add(int(d.indices[2]))
+        neighbors = [[] for _ in range(self.natoms)]
+        for bond in self.internals["bonds"]:
+            i, j = bond.indices
+            if i < self.natoms:
+                neighbors[i].append((int(j), bond.kwargs["ncvecs"][0]))
+            if j < self.natoms:
+                neighbors[j].append((int(i), -bond.kwargs["ncvecs"][0]))
+        for center in range(self.natoms):
+            if len(neighbors[center]) != 3:
+                continue
+            if center in dihedral_centers:
+                continue
+            n0, ncvec0 = neighbors[center][0]
+            n1, ncvec1 = neighbors[center][1]
+            n2, ncvec2 = neighbors[center][2]
+            imp_ncvecs = (-ncvec0, ncvec1, ncvec2 - ncvec1)
+            try:
+                self.add_dihedral((n0, center, n1, n2), imp_ncvecs)
+            except DuplicateInternalError:
+                pass
+
     def validate_basis(self) -> None:
         jac = self.jacobian()
         U, S, VT = np.linalg.svd(jac)
