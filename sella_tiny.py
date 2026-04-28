@@ -2308,6 +2308,25 @@ class Internals(BaseInternals):
                 continue
             if center in dihedral_centers:
                 continue
+            cell = np.asarray(self.atoms.cell)
+            vecs = []
+            for nidx, ncvec in neighbors[center]:
+                vec = (
+                    self.atoms.positions[nidx]
+                    + ncvec @ cell
+                    - self.atoms.positions[center]
+                )
+                norm = np.linalg.norm(vec)
+                if norm < 1e-12:
+                    break
+                vecs.append(vec / norm)
+            if len(vecs) != 3:
+                continue
+            angle_sum = 0.0
+            for v1, v2 in combinations(vecs, 2):
+                angle_sum += np.arccos(np.clip(v1 @ v2, -1.0, 1.0))
+            if angle_sum < 5.9:
+                continue
             n0, ncvec0 = neighbors[center][0]
             n1, ncvec1 = neighbors[center][1]
             n2, ncvec2 = neighbors[center][2]
