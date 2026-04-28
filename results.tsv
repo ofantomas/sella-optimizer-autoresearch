@@ -138,3 +138,4 @@ e1ccfd7	1.215110	1.215110	1.000439	0.9960	1	discard	angular-axis fallback improp
 8a52c9b	1.214517	1.214517	1.000439	0.9960	1	keep	relative-stretch linear dummy internals
 2fdcba6	1.214044	1.214044	1.000439	0.9960	1	keep	shorter-relative linear dummy internals
 b37c071	1.214044	1.214044	1.000439	0.9960	1	discard	covalent-excess linear dummy internals
+28ad5b3	1.250764	1.250764	1.000733	0.9960	1	discard	bond-length linear dummy radius
