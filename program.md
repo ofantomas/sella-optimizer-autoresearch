@@ -32,12 +32,20 @@ This is the most important constraint. Do not keep a faster optimizer if it lose
 
 ## Search Mandate
 
-You are not limited to hyperparameter tuning. You should investigate both:
+This is not a hyperparameter-tuning run. Hyperparameters are useful for calibration, but they are not the main research frontier. The main goal is to discover new optimizer behavior that reduces force calls while preserving the hard energy-quality requirement.
 
-- Optimal hyperparameter configurations for the existing optimizer structure.
-- New and creative optimizer ideas, including algorithmic changes to step prediction, Hessian handling, trust-region behavior, internal-coordinate treatment, acceptance logic, and convergence behavior.
+Prioritize novel optimization approaches:
 
-Treat hyperparameters as one search direction, not the whole search space. Strong experiments can be conservative parameter sweeps, principled algorithmic changes, or creative simplifications. The simplicity criterion below remains intact: new ideas must still earn their complexity through valid, measurable improvements.
+- New step-prediction mechanisms.
+- Better Hessian initialization, updating, conditioning, damping, or projection.
+- Trust-region adaptation that reacts more intelligently to accepted and rejected steps.
+- Internal-coordinate weighting, filtering, or geometry-aware scaling.
+- Acceptance/recovery logic that avoids wasted force calls without hiding failures.
+- Simplifications that remove brittle machinery while matching or improving fitness.
+
+Use HP tuning as a supporting tool: calibrate promising ideas, establish baselines, and refine constants after an algorithmic direction shows signal. Do not spend the run doing only small scalar sweeps around the current best unless those sweeps are explicitly testing a broader optimizer hypothesis.
+
+Creative changes are encouraged, including replacing a local mechanism outright when the branch evidence suggests it is weak. The simplicity criterion below remains intact: every new mechanism must earn its complexity through valid, measurable improvement, and simple wins are preferred over ornate ones.
 
 ## Simplicity Criterion
 
@@ -136,4 +144,4 @@ Use `status=keep` for a new best valid result, `discard` for valid but worse, an
 
 ## Search Hints
 
-High-value areas in `sella_tiny.py` include trust-radius adaptation, Hessian update stability, initialization, line/search step restrictions, and internal-coordinate handling. Explore both HP configurations and genuinely new optimizer mechanisms. Prefer simple changes that improve robustness and reduce force calls together. Avoid broad exception swallowing or fallbacks that hide real failures.
+High-value areas in `sella_tiny.py` include trust-radius adaptation, Hessian update stability, initialization, line/search step restrictions, and internal-coordinate handling. Favor genuinely new optimizer mechanisms and use HP tuning only to validate or calibrate those mechanisms. Prefer simple changes that improve robustness and reduce force calls together. Avoid broad exception swallowing or fallbacks that hide real failures.
