@@ -161,3 +161,4 @@ fe0917b	1.214044	1.214044	1.000439	0.9960	1	discard	rho_dec 140 with relative du
 e8320bc	1.214340	1.214340	1.000439	0.9960	1	discard	high coordination cartesian translations
 c8947e4	1.254258	1.254258	1.001070	0.9920	1	discard	cartesian help at linear dummy centers
 31d4c02	1.226179	1.226179	1.000436	0.9960	1	discard	linear dummy fallback threshold 0.01
+9dd3297	1.214044	1.214044	1.000439	0.9960	1	discard	bond scale 1.235 with relative dummy ordering
