@@ -3035,7 +3035,18 @@ class BaseRestrictedStep:
 class MaxInternalStep(BaseRestrictedStep):
     synonyms = ["mis", "max internal step"]
 
-    def __init__(self, pes, *args, wx=1.0, wb=1.0, wa=1.08, wd=1.0, wo=1.0, **kwargs):
+    def __init__(
+        self,
+        pes,
+        *args,
+        wx=1.0,
+        wb=1.0,
+        wa=1.08,
+        wd=1.0,
+        wo=1.0,
+        curvature_weighting=True,
+        **kwargs,
+    ):
         if pes.int is None:
             raise ValueError(
                 f"Internal coordinates are required for the {self.__class__.__name__} trust region method"
@@ -3045,7 +3056,31 @@ class MaxInternalStep(BaseRestrictedStep):
         self.wa = wa
         self.wd = wd
         self.wo = wo
+        self.curvature_weighting = curvature_weighting
+        self.curvature_weights = self._curvature_weights(pes)
         BaseRestrictedStep.__init__(self, pes, *args, **kwargs)
+
+    @staticmethod
+    def _curvature_weights(pes):
+        counts = (
+            pes.int.ntrans,
+            pes.int.nbonds,
+            pes.int.nangles,
+            pes.int.ndihedrals,
+            pes.int.nother,
+            pes.int.nrotations,
+        )
+        nint = sum(counts)
+        diag = np.abs(np.diag(pes.get_H().asarray()))[:nint]
+        good = np.isfinite(diag) & (diag > 1e-12)
+        if not np.any(good):
+            return np.ones(nint)
+        ref = np.median(diag[good])
+        if not np.isfinite(ref) or ref <= 0.0:
+            return np.ones(nint)
+        weights = np.ones(nint)
+        weights[good] = np.sqrt(diag[good] / ref)
+        return np.clip(weights, 0.85, 1.2)
 
     def cons(self, s, dsda=None):
         w = np.array(
@@ -3057,6 +3092,8 @@ class MaxInternalStep(BaseRestrictedStep):
             + [self.wx] * self.pes.int.nrotations
         )
         assert len(w) == len(s)
+        if self.curvature_weighting:
+            w = w * self.curvature_weights
         sw = np.abs(s * w)
         idx = np.argmax(np.abs(sw))
         val = sw[idx]
