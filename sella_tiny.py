@@ -2710,6 +2710,7 @@ class InternalPES(PES):
     def _set_x_ode(self, target):
         dx = target - self.get_x()
         t0 = 0.0
+        self.bad_int = None
         Binv = self._get_Binv()
         y0 = np.hstack(
             (
@@ -3228,15 +3229,25 @@ class Sella(Optimizer):
         self.pes._update_basis()
         self.pes.save()
         all_valid = False
+        bad_internal_retries = 0
         x0 = self.pes.get_x()
         while not all_valid:
             s, smag = self.rs(
                 self.pes, self.ord, self.delta, method=self.method
             ).get_s()
             self.pes.set_x(x0 + s)
-            all_valid = self.pes.cons.validate_inequalities()
+            bad_internal = self.internal and self.pes.bad_int is not None
+            all_valid = (
+                not bad_internal and self.pes.cons.validate_inequalities()
+            )
             self.pes._update_basis()
             self.pes.restore()
+            if bad_internal:
+                if bad_internal_retries < 1:
+                    self.delta = max(smag * self.sigma_dec, self.delta_min)
+                    bad_internal_retries += 1
+                    continue
+                all_valid = True
         self.pes._update_basis()
         return (s, smag)
 
