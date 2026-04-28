@@ -30,6 +30,18 @@ mean_rel_energy < 0.999
 
 This is the most important constraint. Do not keep a faster optimizer if it loses energy quality. Invalid runs receive `fitness = 1000.0` and must be discarded, no matter how low their raw step count looks.
 
+## Simplicity Criterion
+
+All else being equal, simpler is better. A small valid step-count improvement that adds ugly, brittle, or hard-to-reason-about optimizer complexity is usually not worth keeping. Conversely, removing code and getting equal or better valid fitness is a strong simplification win.
+
+When evaluating whether to keep a change, weigh complexity cost against improvement size:
+
+- A tiny `mean_rel_steps` improvement that adds a large hacky special case is probably not worth it.
+- A tiny `mean_rel_steps` improvement from deleting code, reducing branching, or making an invariant clearer is usually worth keeping.
+- An approximately neutral score change that makes `sella_tiny.py` substantially simpler, more robust, or easier to mutate can be kept.
+
+Do not confuse simplicity with conservatism. Larger architectural changes are allowed when they are coherent, measurable, and preserve the validity requirement. Avoid changes that merely hide failures, swallow errors, or add opaque constants without a clear optimizer rationale.
+
 ## Interface Contract
 
 `sella_tiny.py` must keep this interface:
@@ -96,6 +108,12 @@ Loop forever:
 7. Continue with the next idea.
 
 Do not optimize for `mean_rel_energy` beyond the validity floor unless step count is tied. The target is the lowest valid `mean_rel_steps`.
+
+This loop is autonomous. Once the experiment loop has begun after setup, do not pause to ask the human whether to continue, whether a stopping point is good, or whether the next idea is acceptable. The human may be asleep or away and expects the loop to continue indefinitely until manually interrupted.
+
+If a change works, keep it and advance the branch. If it does not work, discard it and return to the best known valid state. Rewind sparingly, and only when the branch has clearly moved into an unproductive or broken region.
+
+If you feel stuck, think harder instead of stopping: re-read `sella_tiny.py`, inspect prior `results.tsv` entries, look for patterns in failures, combine previous near-misses, try simplifications, or test more radical optimizer changes. The loop runs until interrupted.
 
 ## Results TSV
 
