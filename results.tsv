@@ -135,3 +135,4 @@ e1ccfd7	1.215110	1.215110	1.000439	0.9960	1	discard	angular-axis fallback improp
 74f0e67	1.225682	1.225682	1.000833	0.9960	1	discard	grow on underpredicted successes
 151b943	1.215044	1.215044	1.000439	0.9960	1	discard	fallback impropers angle trust weight
 3bf0b5d	1.215017	1.215017	1.000439	0.9960	1	keep	longer-first linear dummy internals
+8a52c9b	1.214517	1.214517	1.000439	0.9960	1	keep	relative-stretch linear dummy internals
