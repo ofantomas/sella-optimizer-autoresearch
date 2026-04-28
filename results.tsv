@@ -116,3 +116,4 @@ be5d2f5	1.215444	1.215444	1.000439	0.9960	1	discard	bond scale 1.235 with angle 
 fb15a48	1.256256	1.256256	1.000970	0.9960	1	discard	curvature-weighted internal trust
 5feb60a	1000.000000	1000.000000	-1.000000	-1.0000	0	invalid	pre-retry bad internal steps hung worker tasks
 8a0448a	1.215757	1.215757	1.000439	0.9960	1	discard	no shrink on high rho
+133f35e	1.286998	1.286998	1.001123	0.9840	1	discard	skip hessian update on negative rho
