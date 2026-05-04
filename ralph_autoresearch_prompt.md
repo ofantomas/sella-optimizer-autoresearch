@@ -2,6 +2,8 @@ Read and follow `program.md`.
 
 You are running inside Open Ralph Wiggum. Ralph will relaunch this prompt repeatedly, so resume from git history, `run.log`, `results.tsv`, and the current working tree.
 
+Do not inspect Ralph internals. Never read or search `.ralph/`, Ralph state files, Ralph history files, or Ralph context files.
+
 Runtime contract:
 - Work on the current branch.
 - Use the conda environment selected by the launcher.
@@ -14,5 +16,3 @@ Important operating rules:
 - Prefer creative optimizer mechanisms over scalar hyperparameter sweeps, while keeping the simplicity criterion from `program.md`.
 - Keep only valid improvements to `fitness`; discard invalid runs and regressions.
 - Continue indefinitely until the human manually stops the loop.
-
-Never output the Ralph completion promise unless explicitly instructed by the human.
