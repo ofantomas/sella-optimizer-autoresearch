@@ -3229,7 +3229,10 @@ class Sella(Optimizer):
         elif 1.0 / self.rho_inc < rho < self.rho_inc:
             self._rho_expand_streak += 1
             streak_boost = min(1.0 + 0.012 * (self._rho_expand_streak - 1), 1.06)
-            self.delta = max(self.sigma_inc * streak_boost * smag, self.delta)
+            # Interior QN steps have smag << delta; smag-only growth would never raise
+            # delta. Tie the floor to delta so the trust region can track the model.
+            eff_smag = max(smag, 0.88 * self.delta)
+            self.delta = max(self.sigma_inc * streak_boost * eff_smag, self.delta)
         elif self.rho_inc <= rho < 2.5:
             # Slightly conservative model (rho just above the tight band): nudge trust
             # upward without stacking onto the in-band streak to avoid runaway delta.
