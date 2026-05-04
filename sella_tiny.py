@@ -3151,6 +3151,9 @@ class Sella(Optimizer):
         self.rho = 1.0
         self.initialized = False
         self.xi = 1.0
+        # Consecutive steps where rho sits in the trust-radius expansion band; used
+        # to scale up the next expansion slightly when the quadratic model keeps matching well.
+        self._rho_expand_streak = 0
 
     def initialize_pes(
         self,
@@ -3216,13 +3219,19 @@ class Sella(Optimizer):
             )
             self.initialized = False
             self.rho = 1
+            self._rho_expand_streak = 0
             return
         if rho is None:
             pass
         elif rho < 1.0 / self.rho_dec or rho > self.rho_dec:
+            self._rho_expand_streak = 0
             self.delta = max(smag * self.sigma_dec, self.delta_min)
         elif 1.0 / self.rho_inc < rho < self.rho_inc:
-            self.delta = max(self.sigma_inc * smag, self.delta)
+            self._rho_expand_streak += 1
+            streak_boost = min(1.0 + 0.012 * (self._rho_expand_streak - 1), 1.06)
+            self.delta = max(self.sigma_inc * streak_boost * smag, self.delta)
+        else:
+            self._rho_expand_streak = 0
         self.rho = rho
         if self.rho is None:
             self.rho = 1.0
