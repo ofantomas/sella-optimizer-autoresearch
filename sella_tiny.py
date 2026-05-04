@@ -3230,6 +3230,11 @@ class Sella(Optimizer):
             self._rho_expand_streak += 1
             streak_boost = min(1.0 + 0.012 * (self._rho_expand_streak - 1), 1.06)
             self.delta = max(self.sigma_inc * streak_boost * smag, self.delta)
+        elif self.rho_inc <= rho < 2.5:
+            # Slightly conservative model (rho just above the tight band): nudge trust
+            # upward without stacking onto the in-band streak to avoid runaway delta.
+            self._rho_expand_streak = 0
+            self.delta = max(self.sigma_inc * 0.91 * smag, self.delta)
         else:
             self._rho_expand_streak = 0
         self.rho = rho
