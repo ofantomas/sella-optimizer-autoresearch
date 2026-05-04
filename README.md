@@ -51,7 +51,7 @@ scripts/start_redis.sh 6379
 Start workers:
 
 ```bash
-scripts/start_workers.sh localhost 6379 8 xtb 1
+scripts/babysit_validate.sh localhost 6379 6379 8 xtb 1.0 false logs_validate python 1 10
 ```
 
 Evaluate the current optimizer:
@@ -65,12 +65,14 @@ The last JSON line in `run.log` contains `fitness`, `mean_rel_steps`, `mean_rel_
 On a remote worker host with this repo cloned and the conda environment active, run:
 
 ```bash
-scripts/start_workers.sh <redis-host> 6379 <num-workers> xtb <xtb-threads-per-worker>
+scripts/babysit_validate.sh <redis-host> 6379 <local-redis-port> <num-workers> xtb 1.0 false logs_validate python <xtb-threads-per-worker> 10
 ```
+
+Use `scripts/babysit_validate.sh` for worker pools. The babysitter respawns each worker after `max_tasks` optimizations, which prevents xTB worker memory growth from accumulating until the host runs out of RAM. The documented long-run default is `max_tasks=10`.
 
 ## Launch Autoresearch
 
-Run the autoresearch loop from a research branch in the same checkout. The default Ralph setup assumes existing Redis and workers are already available on `localhost:6379`; it does not start or stop them.
+Run the autoresearch loop from a research branch in the same checkout. The default launch starts Redis, a babysat 48-worker xTB pool on `localhost:6379`, and Ralph in one tmux session.
 
 ```bash
 git switch -c autoresearch/creative
@@ -78,7 +80,21 @@ rm -f results.tsv
 mkdir -p logs_autoresearch
 LOG="logs_autoresearch/ralph-$(date +%Y%m%d-%H%M%S).log"
 
-tmux new-session -d -s sella-ralph-autoresearch -n ralph "bash -lc '
+tmux new-session -d -s sella-ralph-autoresearch -n redis "bash -lc '
+  set -Eeuo pipefail
+  source \"\$HOME/miniforge3/etc/profile.d/conda.sh\"
+  conda activate sella-autoresearch
+  exec scripts/start_redis.sh 6379
+'"
+
+tmux new-window -d -t sella-ralph-autoresearch -n workers "bash -lc '
+  set -Eeuo pipefail
+  source \"\$HOME/miniforge3/etc/profile.d/conda.sh\"
+  conda activate sella-autoresearch
+  exec scripts/babysit_validate.sh localhost 6379 6379 48 xtb 1.0 false logs_validate python 1 10
+'"
+
+tmux new-window -d -t sella-ralph-autoresearch -n ralph "bash -lc '
   set -Eeuo pipefail
   export PATH=\"\$HOME/.local/bin:\$HOME/.bun/bin:\$PATH\"
   source \"\$HOME/miniforge3/etc/profile.d/conda.sh\"
