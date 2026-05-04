@@ -7,21 +7,34 @@ PROGRAM="${PROGRAM:-sella_tiny.py}"
 SPLIT="${SPLIT:-train}"
 REDIS_HOST="${REDIS_HOST:-localhost}"
 REDIS_PORT="${REDIS_PORT:-6379}"
+PYTHON_BIN="${PYTHON_BIN:-}"
 
-python validate.py \
+if [ -z "$PYTHON_BIN" ]; then
+    if [ -n "${CONDA_PREFIX:-}" ] && [ -x "$CONDA_PREFIX/bin/python" ]; then
+        PYTHON_BIN="$CONDA_PREFIX/bin/python"
+    elif [ -x "$HOME/miniconda3/envs/sella-autoresearch/bin/python" ]; then
+        PYTHON_BIN="$HOME/miniconda3/envs/sella-autoresearch/bin/python"
+    elif [ -x "$HOME/miniforge3/envs/sella-autoresearch/bin/python" ]; then
+        PYTHON_BIN="$HOME/miniforge3/envs/sella-autoresearch/bin/python"
+    else
+        PYTHON_BIN="python"
+    fi
+fi
+
+"$PYTHON_BIN" validate.py \
     --program "$PROGRAM" \
     --split "$SPLIT" \
     --redis-host "$REDIS_HOST" \
     --redis-port "$REDIS_PORT" \
     > "$RUN_LOG" 2>&1
 
-python scripts/score_log.py "$RUN_LOG"
+"$PYTHON_BIN" scripts/score_log.py "$RUN_LOG"
 
 if [ ! -f results.tsv ]; then
     printf "commit\tfitness\tmean_rel_steps\tmean_rel_energy\tconverged\tis_valid\tstatus\tdescription\n" > results.tsv
 fi
 
-python - "$RUN_LOG" "$DESCRIPTION" <<'INNER_PY'
+"$PYTHON_BIN" - "$RUN_LOG" "$DESCRIPTION" <<'INNER_PY'
 from __future__ import annotations
 
 import json
