@@ -3221,12 +3221,14 @@ class Sella(Optimizer):
             pass
         elif rho < 1.0 / self.rho_dec or rho > self.rho_dec:
             self.delta = max(smag * self.sigma_dec, self.delta_min)
-        elif 1.0 / self.rho_inc < rho < self.rho_inc:
-            self.delta = max(self.sigma_inc * smag, self.delta)
-        elif self.rho_inc <= rho < self.rho_dec:
-            # Better-than-predicted reduction: quadratic model was conservative; grow
-            # delta slightly (tight band above already uses sigma_inc).
-            self.delta = max(1.07 * smag, self.delta)
+        else:
+            rho_band = self.rho_inc * 1.025
+            if 1.0 / rho_band < rho < rho_band:
+                self.delta = max(self.sigma_inc * smag, self.delta)
+            elif rho_band <= rho < self.rho_dec:
+                # Better-than-predicted reduction: quadratic model was conservative; grow
+                # delta slightly (tight band above already uses sigma_inc).
+                self.delta = max(1.07 * smag, self.delta)
         self.rho = rho
         if self.rho is None:
             self.rho = 1.0
