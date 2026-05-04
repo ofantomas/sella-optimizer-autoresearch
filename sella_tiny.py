@@ -3228,7 +3228,7 @@ class Sella(Optimizer):
             self.delta = max(smag * self.sigma_dec, self.delta_min)
         elif 1.0 / self.rho_inc < rho < self.rho_inc:
             self._rho_expand_streak += 1
-            streak_boost = min(1.0 + 0.012 * (self._rho_expand_streak - 1), 1.06)
+            streak_boost = min(1.0 + 0.012 * (self._rho_expand_streak - 1), 1.062)
             # Interior QN steps have smag << delta; smag-only growth would never raise
             # delta. Tie the floor to delta so the trust region can track the model.
             eff_smag = max(smag, 0.88 * self.delta)
