@@ -7,8 +7,8 @@ Do not inspect Ralph internals. Never read or search `.ralph/`, Ralph state file
 Runtime contract:
 - Work on the current branch.
 - Use the conda environment selected by the launcher.
-- Use Redis/workers on `localhost:6379`.
-- Worker pools must be launched through `scripts/babysit_validate.sh` so workers are respawned before xTB memory growth exhausts RAM. For the 48-worker xTB pool, use `max_tasks=10`.
+- Use the existing Redis and babysat workers on `localhost:6379`.
+- Do not start, stop, restart, kill, or babysit Redis or validation workers. The launcher owns that infrastructure.
 - Run evaluations with `REDIS_PORT=6379 scripts/run_experiment.sh "short description"`.
 
 Important operating rules:
