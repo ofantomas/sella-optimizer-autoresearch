@@ -3222,7 +3222,7 @@ class Sella(Optimizer):
         elif rho < 1.0 / self.rho_dec or rho > self.rho_dec:
             self.delta = max(smag * self.sigma_dec, self.delta_min)
         else:
-            rho_band = self.rho_inc * 1.025
+            rho_band = self.rho_inc * 1.032
             if 1.0 / rho_band < rho < rho_band:
                 self.delta = max(self.sigma_inc * smag, self.delta)
             elif rho_band <= rho < self.rho_dec:
