@@ -3245,7 +3245,7 @@ class Sella(Optimizer):
             # QN model is well aligned with the true PES; allow a small extra expansion
             # only in that geometry-aware regime (capped to stay conservative).
             step_util = smag / max(self.delta, 1e-30)
-            util_bonus = 0.002 * min(max((step_util - 0.35) / 0.45, 0.0), 1.0)
+            util_bonus = 0.0022 * min(max((step_util - 0.35) / 0.45, 0.0), 1.0)
             hi_rho_growth = min(hi_rho_growth + util_bonus, 0.922)
             self.delta = max(self.sigma_inc * hi_rho_growth * smag, self.delta)
         else:
