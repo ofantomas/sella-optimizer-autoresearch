@@ -3241,6 +3241,12 @@ class Sella(Optimizer):
             span = max(2.5 - self.rho_inc, 1e-12)
             t = (rho - self.rho_inc) / span
             hi_rho_growth = 0.918 + (0.912 - 0.918) * t
+            # Steps that use a large fraction of the trust radius tend to sit where the
+            # QN model is well aligned with the true PES; allow a small extra expansion
+            # only in that geometry-aware regime (capped to stay conservative).
+            step_util = smag / max(self.delta, 1e-30)
+            util_bonus = 0.002 * min(max((step_util - 0.35) / 0.45, 0.0), 1.0)
+            hi_rho_growth = min(hi_rho_growth + util_bonus, 0.922)
             self.delta = max(self.sigma_inc * hi_rho_growth * smag, self.delta)
         else:
             self._rho_expand_streak = 0
