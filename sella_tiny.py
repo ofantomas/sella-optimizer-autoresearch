@@ -2685,7 +2685,7 @@ class InternalPES(PES):
         if H0 is None:
             B = self.int.jacobian()
             P = B @ np.linalg.pinv(B)
-            H0 = P @ self.int.guess_hessian() @ P
+            H0 = 1.002 * (P @ self.int.guess_hessian() @ P)
             self.set_H(H0, initialized=False)
         else:
             self.set_H(H0, initialized=True)
