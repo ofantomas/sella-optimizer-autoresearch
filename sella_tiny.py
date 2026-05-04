@@ -3234,10 +3234,14 @@ class Sella(Optimizer):
             eff_smag = max(smag, 0.88 * self.delta)
             self.delta = max(self.sigma_inc * streak_boost * eff_smag, self.delta)
         elif self.rho_inc <= rho < 2.5:
-            # Slightly conservative model (rho just above the tight band): nudge trust
-            # upward without stacking onto the in-band streak to avoid runaway delta.
+            # Above-band rho: grow trust without streak stacking. Interpolate growth between
+            # the inner edge (model nearly as good as in-band → slightly bolder) and
+            # rho → 2.5 (more cautious) so a flat scalar is not forced for all cases.
             self._rho_expand_streak = 0
-            self.delta = max(self.sigma_inc * 0.915 * smag, self.delta)
+            span = max(2.5 - self.rho_inc, 1e-12)
+            t = (rho - self.rho_inc) / span
+            hi_rho_growth = 0.918 + (0.912 - 0.918) * t
+            self.delta = max(self.sigma_inc * hi_rho_growth * smag, self.delta)
         else:
             self._rho_expand_streak = 0
         self.rho = rho
