@@ -86,7 +86,7 @@ install_miniforge() {
 
   install_dir="$HOME/miniforge3"
   installer_url="https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-${arch}.sh"
-  tmp_installer="$(mktemp)"
+  tmp_installer="$(mktemp "${TMPDIR:-/tmp}/miniforge.XXXXXX.sh")"
 
   log "Installing Miniforge into $install_dir"
   curl -fsSL "$installer_url" -o "$tmp_installer"
