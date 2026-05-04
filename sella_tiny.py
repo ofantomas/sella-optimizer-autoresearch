@@ -3237,7 +3237,7 @@ class Sella(Optimizer):
             # Slightly conservative model (rho just above the tight band): nudge trust
             # upward without stacking onto the in-band streak to avoid runaway delta.
             self._rho_expand_streak = 0
-            self.delta = max(self.sigma_inc * 0.91 * smag, self.delta)
+            self.delta = max(self.sigma_inc * 0.915 * smag, self.delta)
         else:
             self._rho_expand_streak = 0
         self.rho = rho
