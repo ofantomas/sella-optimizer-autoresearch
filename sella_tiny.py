@@ -2927,7 +2927,10 @@ class QuasiNewton(BaseStepper):
         self.ones[: self.order] = -1
 
     def get_s(self, alpha: float) -> Tuple[np.ndarray, np.ndarray]:
-        Lscale = np.max(np.abs(self.L)) + 1e-12
+        la = np.abs(self.L)
+        lmax = np.max(la) + 1e-12
+        lmed = np.median(la) + 1e-12
+        Lscale = np.sqrt(lmax * lmed)
         denom = self.L + alpha * self.ones + 1e-7 * Lscale
         sproj = self.Vg / denom
         s = -self.V @ sproj
