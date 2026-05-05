@@ -2704,7 +2704,7 @@ class InternalPES(PES):
             and self._pinv_cache.get("pinv") is not None
         ):
             return self._pinv_cache["pinv"]
-        Binv = np.linalg.pinv(B)
+        Binv = np.linalg.pinv(B, rcond=1e-10)
         self._pinv_cache["version"] = version
         self._pinv_cache["pinv"] = Binv
         return Binv
