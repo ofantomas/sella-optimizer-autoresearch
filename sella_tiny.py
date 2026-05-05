@@ -2929,10 +2929,10 @@ class QuasiNewton(BaseStepper):
     def get_s(self, alpha: float) -> Tuple[np.ndarray, np.ndarray]:
         la = np.abs(self.L)
         lmax = np.max(la) + 1e-12
-        # Median of upper 75% of |eigenvalues|: soft / near-null directions
-        # should not dominate the LM curvature scale the way the full median can.
+        # Median of upper 80% of |eigenvalues| (drop lowest 20%): slightly tighter
+        # tail than the 75% slice so near-null modes influence l_hi a bit less.
         la_sorted = np.sort(la)
-        q = len(la_sorted) // 4
+        q = len(la_sorted) // 5
         l_hi = np.median(la_sorted[q:]) + 1e-12
         l_med = np.median(la) + 1e-12
         # Geometric mean of full-median and upper-75% median typical |lambda|.
