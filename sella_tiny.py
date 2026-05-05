@@ -2415,7 +2415,7 @@ class Internals(BaseInternals):
         )
         return h0 * units.Hartree
 
-    def guess_hessian(self, h0cart=70.0) -> np.ndarray:
+    def guess_hessian(self, h0cart=67.0) -> np.ndarray:
         nbonds = np.zeros(len(self.all_atoms), dtype=np.int32)
         h0 = np.zeros(self.nint, dtype=np.float64)
         idx = 0
