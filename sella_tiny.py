@@ -2645,7 +2645,9 @@ class PES:
             ratio = None
         else:
             ratio = df_actual / df_pred
-        self._update_H(dx_final, dg_actual)
+        # Skip BFGS update when the quadratic model does not predict descent here.
+        if df_pred is not None and df_pred < 0:
+            self._update_H(dx_final, dg_actual)
         if diag:
             raise ValueError("sella_minimal does not support eig=True diagonalization.")
         return ratio
