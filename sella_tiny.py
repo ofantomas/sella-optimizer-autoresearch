@@ -3230,7 +3230,7 @@ class Sella(Optimizer):
             elif rho_band <= rho < self.rho_dec:
                 # Better-than-predicted reduction: quadratic model was conservative; grow
                 # delta slightly (tight band above already uses sigma_inc).
-                self.delta = max(1.072981 * smag, self.delta)
+                self.delta = max(1.0729805 * smag, self.delta)
         self.rho = rho
         if self.rho is None:
             self.rho = 1.0
