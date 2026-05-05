@@ -32,9 +32,11 @@ This is the most important constraint. Do not keep a faster optimizer if it lose
 
 ## Search Mandate
 
-This is not a hyperparameter-tuning run. Hyperparameters are useful for calibration, but they are not the main research frontier. The main goal is to discover new optimizer behavior that reduces force calls while preserving the hard energy-quality requirement.
+This is not a hyperparameter-tuning run. Treat this as an algorithmic invention task. Hyperparameters are useful only for late calibration after a genuinely new mechanism has shown signal; they are not the research frontier. The main goal is to discover new optimizer behavior that reduces force calls while preserving the hard energy-quality requirement.
 
-Prioritize novel optimization approaches:
+Do not waste compute on small scalar sweeps, threshold nudges, or local constant polishing around the current best. If an experiment changes only a number, it must be testing a broader optimizer hypothesis that was not already tested. Prefer bold, coherent mechanisms over another decimal-place adjustment.
+
+Prioritize novel, potentially ground-breaking optimization approaches:
 
 - New step-prediction mechanisms.
 - Better Hessian initialization, updating, conditioning, damping, or projection.
@@ -42,10 +44,13 @@ Prioritize novel optimization approaches:
 - Internal-coordinate weighting, filtering, or geometry-aware scaling.
 - Acceptance/recovery logic that avoids wasted force calls without hiding failures.
 - Simplifications that remove brittle machinery while matching or improving fitness.
+- Ideas inspired by modern numerical optimization papers, molecular geometry optimization methods, quasi-Newton variants, rational-function optimization, preconditioning, or learned/online curvature estimation.
 
 Use HP tuning as a supporting tool: calibrate promising ideas, establish baselines, and refine constants after an algorithmic direction shows signal. Do not spend the run doing only small scalar sweeps around the current best unless those sweeps are explicitly testing a broader optimizer hypothesis.
 
 Creative changes are encouraged, including replacing a local mechanism outright when the branch evidence suggests it is weak. The simplicity criterion below remains intact: every new mechanism must earn its complexity through valid, measurable improvement, and simple wins are preferred over ornate ones.
+
+When stuck, read new optimization papers or technical notes online instead of cycling through more constants. Search for ideas in molecular geometry optimization, transition-state searches, trust-region methods, RFO/RS-RFO, quasi-Newton Hessian updates, preconditioning, sparse/low-rank curvature models, and internal-coordinate optimization. Summarize the transferable idea in the experiment description before implementing it.
 
 ## Simplicity Criterion
 
@@ -99,7 +104,7 @@ scripts/start_redis.sh 6379
 Start workers in one or more terminals or hosts:
 
 ```bash
-scripts/start_workers.sh localhost 6379 8 xtb 1
+scripts/babysit_validate.sh localhost 6379 6379 8 xtb 1.0 false logs_validate python 1 10
 ```
 
 Run a single evaluation:
@@ -124,13 +129,22 @@ Loop forever:
 6. If invalid or worse, record it and reset back to the previous best commit.
 7. Continue with the next idea.
 
+Experiment descriptions must be detailed enough to avoid repeating old work. The string passed to `scripts/run_experiment.sh` is written into `run.log`, so use it as a compact research note. Include:
+
+- The hypothesis being tested.
+- The mechanism changed in `sella_tiny.py`.
+- Why it is meaningfully different from recent experiments.
+- What outcome would count as success or failure.
+
+Do not use vague descriptions like `tune factor` or `try smaller constant`. Prefer descriptions like `paper-inspired Powell-damped BFGS update: skip curvature injection when predicted/actual ratio is negative; tests whether bad curvature, not TR radius, causes wasted force calls after rejection streaks`.
+
 Do not optimize for `mean_rel_energy` beyond the validity floor unless step count is tied. The target is the lowest valid `mean_rel_steps`.
 
 This loop is autonomous. Once the experiment loop has begun after setup, do not pause to ask the human whether to continue, whether a stopping point is good, or whether the next idea is acceptable. The human may be asleep or away and expects the loop to continue indefinitely until manually interrupted.
 
 If a change works, keep it and advance the branch. If it does not work, discard it and return to the best known valid state. Rewind sparingly, and only when the branch has clearly moved into an unproductive or broken region.
 
-If you feel stuck, think harder instead of stopping: re-read `sella_tiny.py`, inspect prior `results.tsv` entries, look for patterns in failures, combine previous near-misses, try simplifications, or test more radical optimizer changes. The loop runs until interrupted.
+If you feel stuck, think harder instead of stopping: re-read `sella_tiny.py`, inspect prior `results.tsv` and `run.log` entries, look for patterns in failures, combine previous near-misses, try simplifications, read papers online for fresh optimizer mechanisms, or test more radical optimizer changes. The loop runs until interrupted.
 
 ## Results TSV
 
@@ -144,4 +158,4 @@ Use `status=keep` for a new best valid result, `discard` for valid but worse, an
 
 ## Search Hints
 
-High-value areas in `sella_tiny.py` include trust-radius adaptation, Hessian update stability, initialization, line/search step restrictions, and internal-coordinate handling. Favor genuinely new optimizer mechanisms and use HP tuning only to validate or calibrate those mechanisms. Prefer simple changes that improve robustness and reduce force calls together. Avoid broad exception swallowing or fallbacks that hide real failures.
+High-value areas in `sella_tiny.py` include trust-radius adaptation, Hessian update stability, initialization, line/search step restrictions, and internal-coordinate handling. Favor genuinely new optimizer mechanisms and use HP tuning only to validate or calibrate those mechanisms. Prefer simple changes that improve robustness and reduce force calls together. Avoid broad exception swallowing or fallbacks that hide real failures. If the recent history is dominated by decimal-place changes, deliberately break out of that basin with a new algorithmic idea before running another calibration.

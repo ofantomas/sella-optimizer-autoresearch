@@ -21,12 +21,25 @@ if [ -z "$PYTHON_BIN" ]; then
     fi
 fi
 
+{
+    printf "== Experiment ==\n"
+    printf "timestamp: %s\n" "$(date -Is)"
+    printf "description:\n%s\n" "$DESCRIPTION"
+    printf "program: %s\n" "$PROGRAM"
+    printf "split: %s\n" "$SPLIT"
+    printf "redis: %s:%s\n" "$REDIS_HOST" "$REDIS_PORT"
+    printf "python: %s\n" "$PYTHON_BIN"
+    printf "commit: %s\n" "$(git rev-parse --short HEAD 2>/dev/null || printf unknown)"
+    printf "branch: %s\n" "$(git branch --show-current 2>/dev/null || printf unknown)"
+    printf "== Validation Output ==\n"
+} > "$RUN_LOG"
+
 "$PYTHON_BIN" validate.py \
     --program "$PROGRAM" \
     --split "$SPLIT" \
     --redis-host "$REDIS_HOST" \
     --redis-port "$REDIS_PORT" \
-    > "$RUN_LOG" 2>&1
+    >> "$RUN_LOG" 2>&1
 
 "$PYTHON_BIN" scripts/score_log.py "$RUN_LOG"
 
