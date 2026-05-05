@@ -3078,7 +3078,7 @@ def get_restricted_step(name):
 
 
 _minimum_defaults = dict(
-    delta0=0.1, sigma_inc=1.175, sigma_dec=0.9, rho_inc=1.035, rho_dec=100, method="qn"
+    delta0=0.1, sigma_inc=1.175, sigma_dec=0.9, rho_inc=1.035, rho_dec=120, method="qn"
 )
 
 
