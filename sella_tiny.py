@@ -2929,8 +2929,12 @@ class QuasiNewton(BaseStepper):
     def get_s(self, alpha: float) -> Tuple[np.ndarray, np.ndarray]:
         la = np.abs(self.L)
         lmax = np.max(la) + 1e-12
-        lmed = np.median(la) + 1e-12
-        Lscale = np.sqrt(lmax * lmed)
+        # Median of upper 75% of |eigenvalues|: soft / near-null directions
+        # should not dominate the LM curvature scale the way the full median can.
+        la_sorted = np.sort(la)
+        q = len(la_sorted) // 4
+        ltyp = np.median(la_sorted[q:]) + 1e-12
+        Lscale = np.sqrt(lmax * ltyp)
         denom = self.L + alpha * self.ones + 1e-7 * Lscale
         sproj = self.Vg / denom
         s = -self.V @ sproj
