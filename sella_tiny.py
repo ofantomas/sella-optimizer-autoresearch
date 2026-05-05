@@ -2933,7 +2933,10 @@ class QuasiNewton(BaseStepper):
         # should not dominate the LM curvature scale the way the full median can.
         la_sorted = np.sort(la)
         q = len(la_sorted) // 4
-        ltyp = np.median(la_sorted[q:]) + 1e-12
+        l_hi = np.median(la_sorted[q:]) + 1e-12
+        l_med = np.median(la) + 1e-12
+        # Geometric mean of full-median and upper-75% median typical |lambda|.
+        ltyp = np.sqrt(l_hi * l_med)
         Lscale = np.sqrt(lmax * ltyp)
         denom = self.L + alpha * self.ones + 1e-7 * Lscale
         sproj = self.Vg / denom
