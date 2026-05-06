@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-CONDA_ENV_NAME="${CONDA_ENV_NAME:-sella-autoresearch}"
+CONDA_ENV_NAME="${CONDA_ENV_NAME:-gigaopt}"
 CONDA_ENV_FILE="${CONDA_ENV_FILE:-environment.yml}"
 RALPH_DIR="${RALPH_DIR:-$HOME/tools/open-ralph-wiggum}"
 RALPH_REPO="${RALPH_REPO:-https://github.com/Th0rgal/open-ralph-wiggum}"
@@ -14,7 +14,7 @@ Usage: scripts/install_autoresearch_tools.sh
 
 Environment variables:
   CONDA_ENV_NAME          Conda environment name to create/update.
-                          Default: sella-autoresearch
+                          Default: gigaopt (matches opt_problem:main)
   CONDA_ENV_FILE          Conda environment file.
                           Default: environment.yml
   RALPH_DIR               Open Ralph Wiggum checkout path.

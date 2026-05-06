@@ -1,90 +1,99 @@
 """
 XTB-based molecular system for energy minimization.
 
-Energies and forces are computed with GFN2-xTB (or GFN1-xTB) via tblite.
+Energies and forces are computed with GFN2-xTB (or GFN1-xTB) by invoking
+the standalone ``xtb`` 6.6.1 binary as a subprocess. We avoid the
+``xtb-python`` bindings so the only runtime requirement is the ``xtb``
+executable on $PATH (override with $XTB_BIN).
 Atomic numbers and the starting geometry are loaded from an XYZ file.
 Units: energy in kJ/mol, forces in kJ/(mol·nm).
 """
 
 import os
-import glob
-import ctypes
+import re
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+
 import numpy as np
 
-from tblite.interface import Calculator
+from utils import (
+    ANGSTROM_TO_NM,
+    FORCE_CONV,
+    HARTREE_TO_KJ,
+    Z_TO_SYMBOL,
+    parse_xyz,
+)
 
-from utils import BOHR_PER_NM, FORCE_CONV, HARTREE_TO_KJ, parse_xyz
+
+_METHOD_TO_GFN: dict[str, str] = {
+    "GFN2-xTB": "2",
+    "GFN1-xTB": "1",
+}
 
 
-def _set_thread_count(num_threads: int) -> None:
-    """Limit in-process threading libraries to the requested thread count.
+def _resolve_xtb_binary() -> str:
+    explicit = os.environ.get("XTB_BIN")
+    if explicit:
+        return explicit
+    found = shutil.which("xtb")
+    if not found:
+        raise RuntimeError(
+            "xtb binary not found on PATH (set $XTB_BIN to override)."
+        )
+    return found
 
-    os.environ["OMP_NUM_THREADS"] only works when set BEFORE libgomp
-    initialises (library load time).  We therefore call the runtime APIs
-    directly via ctypes on the already-loaded shared objects.
 
-    Reads /proc/self/maps to find the exact libraries loaded in this process
-    and uses RTLD_NOLOAD to get handles to them (not fresh copies).
+def _parse_gradient_file(path: Path, n_atoms: int) -> tuple[float, np.ndarray]:
+    """Parse a Turbomole-format ``gradient`` file written by ``xtb --grad``.
+
+    Returns (energy_hartree, gradient_eh_per_bohr) with gradient shape (N, 3).
     """
-    num_threads = max(1, int(num_threads))
-    os.environ["OMP_NUM_THREADS"] = str(num_threads)
-    os.environ["OPENBLAS_NUM_THREADS"] = str(num_threads)
-    os.environ["MKL_NUM_THREADS"] = str(num_threads)
+    text = path.read_text()
+    # Fortran 'D' exponent → Python 'E'
+    text = re.sub(r"([0-9.])[Dd]([+-]?\d)", r"\1E\2", text)
 
-    _RTLD_NOLOAD = 0x00004  # dlopen flag: return existing handle or fail
+    energy_match = re.search(r"SCF energy\s*=\s*(\S+)", text)
+    if not energy_match:
+        raise ValueError(f"could not find SCF energy in {path}")
+    energy = float(energy_match.group(1))
 
-    loaded: dict[str, list[str]] = {"gomp": [], "openblas": [], "mkl": []}
-    try:
-        with open("/proc/self/maps") as _f:
-            for _line in _f:
-                _parts = _line.strip().split()
-                if not _parts or not _parts[-1].startswith("/"):
-                    continue
-                _p = _parts[-1]
-                if "libgomp" in _p or "libomp" in _p:
-                    if _p not in loaded["gomp"]:
-                        loaded["gomp"].append(_p)
-                elif "libopenblas" in _p:
-                    if _p not in loaded["openblas"]:
-                        loaded["openblas"].append(_p)
-                elif "libmkl" in _p:
-                    if _p not in loaded["mkl"]:
-                        loaded["mkl"].append(_p)
-    except OSError:
-        pass
-
-    if not loaded["gomp"]:
-        import tblite as _t
-        _libs_dir = os.path.join(os.path.dirname(os.path.dirname(_t.__file__)), "tblite.libs")
-        loaded["gomp"] = glob.glob(os.path.join(_libs_dir, "libgomp*.so*")) + ["libgomp.so.1"]
-
-    for _path in loaded["gomp"]:
+    # gradient is the last N 3-float lines before $end
+    grad_rows: list[list[float]] = []
+    for line in reversed(text.splitlines()):
+        s = line.strip()
+        if not s or s.startswith("$"):
+            continue
+        parts = s.split()
+        if len(parts) != 3:
+            continue
         try:
-            _lib = ctypes.CDLL(_path, mode=_RTLD_NOLOAD)
-            _lib.omp_set_num_threads(num_threads)
-        except (OSError, AttributeError):
-            pass
+            grad_rows.append([float(parts[0]), float(parts[1]), float(parts[2])])
+        except ValueError:
+            continue
+        if len(grad_rows) == n_atoms:
+            break
 
-    for _path in loaded["openblas"]:
-        try:
-            _lib = ctypes.CDLL(_path, mode=_RTLD_NOLOAD)
-            _lib.openblas_set_num_threads(num_threads)
-        except (OSError, AttributeError):
-            pass
+    if len(grad_rows) != n_atoms:
+        raise ValueError(
+            f"expected {n_atoms} gradient rows in {path}, found {len(grad_rows)}"
+        )
 
-    for _path in loaded["mkl"]:
-        try:
-            _lib = ctypes.CDLL(_path, mode=_RTLD_NOLOAD)
-            _lib.mkl_set_num_threads(ctypes.byref(ctypes.c_int(num_threads)))
-        except (OSError, AttributeError):
-            pass
+    grad_rows.reverse()
+    return energy, np.asarray(grad_rows, dtype=float)
 
 
-def _force_single_thread() -> None:
-    _set_thread_count(1)
+def _write_xyz(atomic_numbers: np.ndarray, positions_ang: np.ndarray, path: Path) -> None:
+    n = len(atomic_numbers)
+    lines = [f"{n}\n", "\n"]
+    for z, (x, y, z_) in zip(atomic_numbers, positions_ang):
+        lines.append(f"{Z_TO_SYMBOL[int(z)]:<2} {x:20.10f} {y:20.10f} {z_:20.10f}\n")
+    path.write_text("".join(lines))
 
 
 # ── main class ────────────────────────────────────────────────────────────────
+
 
 class XTBMolecularSystem:
     """
@@ -98,7 +107,7 @@ class XTBMolecularSystem:
         method:    xTB Hamiltonian — "GFN2-xTB" (default) or "GFN1-xTB".
         accuracy:  SCF convergence threshold (default 0.2). Increase (e.g. 3.0)
             to trade accuracy for speed in optimizer inner loops.
-        verbose:   tblite verbosity flag.
+        verbose:   if False, xtb stdout/stderr are discarded.
         num_threads: threads to use for xTB calculations.
     """
 
@@ -110,11 +119,18 @@ class XTBMolecularSystem:
         verbose: bool = False,
         num_threads: int = 1,
     ):
+        if method not in _METHOD_TO_GFN:
+            raise ValueError(
+                f"Unknown xTB method {method!r}; expected one of "
+                f"{sorted(_METHOD_TO_GFN)}"
+            )
         self._atomic_numbers, self._initial_positions = parse_xyz(xyz_path)
         self.method = method
+        self._gfn = _METHOD_TO_GFN[method]
         self.accuracy = accuracy
         self.verbose = verbose
         self.num_threads = max(1, int(num_threads))
+        self._xtb_bin = _resolve_xtb_binary()
 
     @property
     def atomic_numbers(self) -> np.ndarray:
@@ -126,7 +142,7 @@ class XTBMolecularSystem:
 
     def compute(self, positions, **kwargs) -> tuple[float, np.ndarray]:
         """
-        Compute energy and forces with xTB.
+        Compute energy and forces by shelling out to the xtb binary.
 
         Args:
             positions: array-like (N, 3) in nm.
@@ -134,27 +150,72 @@ class XTBMolecularSystem:
         Returns:
             (energy, forces): energy in kJ/mol, forces in kJ/(mol·nm).
         """
-        pos_bohr = np.asarray(positions, dtype=float) * BOHR_PER_NM
+        positions_arr = np.asarray(positions, dtype=float)
+        if positions_arr.shape != self._initial_positions.shape:
+            return float("inf"), np.zeros_like(positions_arr, dtype=float)
+
+        positions_ang = positions_arr / ANGSTROM_TO_NM
 
         try:
-            calc = Calculator(
-                self.method,
-                self._atomic_numbers,
-                pos_bohr,
-                charge=0,
-            )
-            calc.set("accuracy", self.accuracy)
-            calc.set("verbosity", 1 if self.verbose else 0)
-            _set_thread_count(self.num_threads)
+            with tempfile.TemporaryDirectory(prefix="xtb_") as tmp_str:
+                tmp = Path(tmp_str)
+                xyz_path = tmp / "input.xyz"
+                _write_xyz(self._atomic_numbers, positions_ang, xyz_path)
 
-            res = calc.singlepoint()
+                env = os.environ.copy()
+                threads = str(self.num_threads)
+                # Belt-and-suspenders thread caps: cover every threading
+                # backend xtb might be linked against (libgomp/llvm-openmp,
+                # OpenBLAS, MKL, BLIS, Apple Accelerate, NumExpr) plus a
+                # hard OMP cap so nested parallel regions don't escape.
+                for var in (
+                    "OMP_NUM_THREADS",
+                    "OMP_THREAD_LIMIT",
+                    "OPENBLAS_NUM_THREADS",
+                    "MKL_NUM_THREADS",
+                    "BLIS_NUM_THREADS",
+                    "VECLIB_MAXIMUM_THREADS",
+                    "NUMEXPR_NUM_THREADS",
+                ):
+                    env[var] = threads
+                env["OMP_DYNAMIC"] = "FALSE"
+                env["MKL_DYNAMIC"] = "FALSE"
 
-            energy = float(res.get("energy")) * HARTREE_TO_KJ
-            gradient = np.array(res.get("gradient")).reshape(-1, 3)
-            forces = -gradient * FORCE_CONV
-            return energy, np.array(forces, dtype=float)
+                cmd = [
+                    self._xtb_bin,
+                    str(xyz_path),
+                    "--gfn", self._gfn,
+                    "--grad",
+                    "--acc", f"{self.accuracy:g}",
+                    "--chrg", "0",
+                    "--parallel", threads,
+                ]
+                if not self.verbose:
+                    cmd.append("--silent")
+
+                stream = None if self.verbose else subprocess.DEVNULL
+                subprocess.run(
+                    cmd,
+                    cwd=tmp,
+                    env=env,
+                    stdout=stream,
+                    stderr=stream,
+                    check=True,
+                )
+
+                gradient_path = tmp / "gradient"
+                if not gradient_path.is_file():
+                    raise RuntimeError(f"xtb did not produce a gradient file in {tmp}")
+
+                energy_hartree, grad_eh_bohr = _parse_gradient_file(
+                    gradient_path, len(self._atomic_numbers)
+                )
+
+            energy = energy_hartree * HARTREE_TO_KJ
+            forces = -grad_eh_bohr * FORCE_CONV
+            return energy, np.asarray(forces, dtype=float)
         except Exception:
-            return float("inf"), np.zeros_like(positions, dtype=float)
+            return float("inf"), np.zeros_like(positions_arr, dtype=float)
 
 
 # Alias so callers can do: from xtb_molecular_system import MolecularSystem

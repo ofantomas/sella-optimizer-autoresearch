@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import ctypes
 import importlib
 import logging
 import math
@@ -9,6 +10,23 @@ import sys
 import time
 import traceback
 from datetime import datetime
+
+# Cap in-process threading libraries BEFORE numpy/openmm pull libgomp /
+# openblas / MKL into the address space. Pool sizes and the wait policy
+# are baked in at library load time; once loaded, OMP_NUM_THREADS env
+# changes are ignored and only a runtime ctypes hack can resize them.
+# OMP_WAIT_POLICY=PASSIVE / GOMP_SPINCOUNT=0 prevent idle OpenMP threads
+# from busy-waiting and burning CPU.
+for _var, _val in (
+    ("OMP_NUM_THREADS", "1"),
+    ("OPENBLAS_NUM_THREADS", "1"),
+    ("MKL_NUM_THREADS", "1"),
+    ("OMP_WAIT_POLICY", "PASSIVE"),
+    ("OMP_DYNAMIC", "FALSE"),
+    ("MKL_DYNAMIC", "FALSE"),
+    ("GOMP_SPINCOUNT", "0"),
+):
+    os.environ.setdefault(_var, _val)
 
 import numpy as np
 
@@ -63,12 +81,6 @@ _SYSTEM_CACHE: dict[tuple[str, str, str, int], object] = {}
 _OPTIMIZER_CACHE: dict[tuple[str, str | None, str, bool], object] = {}
 
 
-def _configure_jax_x64() -> None:
-    # Serialized Sella optimizers are unpickled in fresh worker processes, so
-    # the worker must enable JAX x64 before any such payload loads JAX.
-    os.environ["JAX_ENABLE_X64"] = "True"
-
-
 def _backend_module_name(mode: str) -> str:
     if mode == "xtb":
         return "xtb_molecular_system"
@@ -94,15 +106,77 @@ def _get_system(mode: str, baseline: dict, num_threads: int):
     return system
 
 
+def _cap_in_process_threads(num_threads: int) -> None:
+    """Resize libgomp / openblas / MKL thread pools loaded in this process.
+
+    OMP_NUM_THREADS only takes effect at library *load* time. Once
+    libgomp is mapped (e.g. by openmm or numpy via openblas), env var
+    changes are ignored — we have to call the runtime APIs via ctypes
+    on the already-loaded handles. /proc/self/maps tells us which paths
+    are loaded; RTLD_NOLOAD reuses the existing handles instead of
+    re-dlopen'ing fresh copies.
+    """
+    num_threads = max(1, int(num_threads))
+    _RTLD_NOLOAD = 0x00004
+
+    loaded: dict[str, list[str]] = {"gomp": [], "openblas": [], "mkl": []}
+    try:
+        with open("/proc/self/maps") as fh:
+            for line in fh:
+                parts = line.strip().split()
+                if not parts or not parts[-1].startswith("/"):
+                    continue
+                p = parts[-1]
+                if "libgomp" in p or "libomp" in p:
+                    if p not in loaded["gomp"]:
+                        loaded["gomp"].append(p)
+                elif "libopenblas" in p:
+                    if p not in loaded["openblas"]:
+                        loaded["openblas"].append(p)
+                elif "libmkl" in p:
+                    if p not in loaded["mkl"]:
+                        loaded["mkl"].append(p)
+    except OSError:
+        return  # /proc not available (e.g., macOS); env vars at load are all we get
+
+    for path in loaded["gomp"]:
+        try:
+            lib = ctypes.CDLL(path, mode=_RTLD_NOLOAD)
+            lib.omp_set_num_threads(num_threads)
+        except (OSError, AttributeError):
+            pass
+
+    for path in loaded["openblas"]:
+        try:
+            lib = ctypes.CDLL(path, mode=_RTLD_NOLOAD)
+            lib.openblas_set_num_threads(num_threads)
+        except (OSError, AttributeError):
+            pass
+
+    for path in loaded["mkl"]:
+        try:
+            lib = ctypes.CDLL(path, mode=_RTLD_NOLOAD)
+            lib.mkl_set_num_threads(ctypes.byref(ctypes.c_int(num_threads)))
+        except (OSError, AttributeError):
+            pass
+
+
 def _preflight_backend_import(mode: str) -> None:
     module_name = _backend_module_name(mode)
     try:
-        importlib.import_module(module_name)
+        module = importlib.import_module(module_name)
     except Exception as exc:
         raise RuntimeError(
             f"Failed to import backend module {module_name!r} for mode {mode!r} "
             f"with interpreter {sys.executable}: {exc}"
         ) from exc
+    if mode == "xtb":
+        try:
+            module._resolve_xtb_binary()
+        except Exception as exc:
+            raise RuntimeError(
+                f"xtb binary not available for mode {mode!r}: {exc}"
+            ) from exc
 
 
 def _get_minimize_func(optimizer_spec: dict) -> object:
@@ -123,6 +197,9 @@ def _run_optimization_task(task: dict) -> dict:
     num_threads = int(task.get("num_threads", 1))
 
     system = _get_system(mode=mode, baseline=baseline, num_threads=num_threads)
+    # Building the system (esp. openmm in FF mode) may dlopen new
+    # threading libs; cap them now before any compute runs.
+    _cap_in_process_threads(num_threads)
     minimize_func = _get_minimize_func(optimizer_spec)
 
     if mode == "xtb":
@@ -213,7 +290,6 @@ def start_worker(
     max_tasks: int = 0,
 ) -> None:
     global logger
-    _configure_jax_x64()
     worker_name = worker_name or f"validate_worker_{os.uname().nodename}_{os.getpid()}"
     logger = setup_logging(worker_name, verbose=verbose, log_dir=log_dir)
 
@@ -240,17 +316,22 @@ def start_worker(
     logger.info("Python executable: %s", sys.executable)
     logger.info("Configured xTB threads per worker: %s", num_threads)
 
-    if "xtb" in supported_modes:
-        os.environ["OMP_NUM_THREADS"] = str(num_threads)
-        os.environ["OPENBLAS_NUM_THREADS"] = str(num_threads)
-        os.environ["MKL_NUM_THREADS"] = str(num_threads)
+    # Override the conservative module-top defaults with the user-requested
+    # thread count. Subprocesses (e.g. xtb) inherit these.
+    os.environ["OMP_NUM_THREADS"] = str(num_threads)
+    os.environ["OPENBLAS_NUM_THREADS"] = str(num_threads)
+    os.environ["MKL_NUM_THREADS"] = str(num_threads)
 
     for mode in supported_modes:
         _preflight_backend_import(mode)
         logger.info("Backend import check passed for mode=%s", mode)
 
-    tasks_done = 0
+    # Resize thread pools that were already loaded by the imports above.
+    # Without this, openmm / openblas keep their default (CPU count) pools
+    # alive and burn cores busy-waiting between tasks.
+    _cap_in_process_threads(num_threads)
 
+    tasks_done = 0
     while True:
         task_id, task = load_next_optimization_task(redis_conn, supported_modes)
         if task_id is None or task is None:
