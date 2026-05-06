@@ -36,35 +36,29 @@ def _load_module_from_path(module_name: str, path: str | os.PathLike[str]):
     return module
 
 
-def serialize_program_entrypoint(program_path: str | os.PathLike[str]) -> bytes:
+def serialize_program_minimize_func(program_path: str | os.PathLike[str]) -> bytes:
     try:
         import cloudpickle
     except ImportError as exc:
-        raise RuntimeError("cloudpickle is required to serialize sella_tiny.py for workers") from exc
+        raise RuntimeError("cloudpickle is required to serialize algo.py for workers") from exc
 
     module_path = Path(program_path).resolve()
-    module_name = f"_sella_candidate_{abs(hash(str(module_path))):x}"
+    module_name = f"_optimizer_candidate_{abs(hash(str(module_path))):x}"
     module = _load_module_from_path(module_name, module_path)
-    entrypoint = getattr(module, "entrypoint", None)
-    if entrypoint is None or not callable(entrypoint):
-        raise RuntimeError(f"{program_path} must define callable entrypoint()")
-    minimize_fn = entrypoint()
+    minimize_fn = getattr(module, "minimize_func", None)
     if minimize_fn is None or not callable(minimize_fn):
-        raise RuntimeError("entrypoint() must return a callable optimizer")
+        raise RuntimeError(f"{program_path} must define callable minimize_func")
 
     if hasattr(cloudpickle, "register_pickle_by_value"):
         cloudpickle.register_pickle_by_value(module)
     return cloudpickle.dumps(minimize_fn)
 
 
-def load_program_entrypoint(program_path: str | os.PathLike[str]) -> Callable:
-    module = _load_module_from_path("sella_candidate", program_path)
-    entrypoint = getattr(module, "entrypoint", None)
-    if entrypoint is None or not callable(entrypoint):
-        raise RuntimeError(f"{program_path} must define callable entrypoint()")
-    minimize_fn = entrypoint()
+def load_program_minimize_func(program_path: str | os.PathLike[str]) -> Callable:
+    module = _load_module_from_path("optimizer_candidate", program_path)
+    minimize_fn = getattr(module, "minimize_func", None)
     if minimize_fn is None or not callable(minimize_fn):
-        raise RuntimeError("entrypoint() must return a callable optimizer")
+        raise RuntimeError(f"{program_path} must define callable minimize_func")
     return minimize_fn
 
 
@@ -183,23 +177,25 @@ class Evaluator:
             submitted.append((task_id, case["mol_name"]))
 
         results: list[dict] = []
+        errors: list[tuple[str, str]] = []
         num_errors = 0
         for task_id, mol_name in submitted:
             try:
                 payload = client.wait_for_result(task_id, timeout_seconds=self.task_timeout_xtb)
             except (RuntimeError, TimeoutError) as exc:
-                print(f"Error in {mol_name}: {exc}")
+                errors.append((mol_name, str(exc)))
                 num_errors += 1
                 continue
 
             if payload["result"] is not None:
                 results.append(payload["result"])
             if payload["error"] is not None:
+                errors.append((mol_name, str(payload["error"])))
                 num_errors += 1
 
         if verbose:
             print(f"Done: {len(results)} results, {num_errors} errors")
-        return {"results": results, "num_errors": num_errors}
+        return {"results": results, "num_errors": num_errors, "errors": errors}
 
 
 def validate(
@@ -236,26 +232,97 @@ def validate(
     return score
 
 
+def _append_run_log(
+    log_path: str | os.PathLike[str],
+    *,
+    optimizer_description: str,
+    split: str,
+    num_molecules: int,
+    duration_s: float,
+    results: list[dict],
+    errors: list[tuple[str, str]],
+    score: dict,
+) -> None:
+    timestamp = datetime.now().isoformat(timespec="seconds")
+    sorted_results = sorted(results, key=lambda item: item["mol_name"])
+    with open(log_path, "a", encoding="utf-8") as file_obj:
+        file_obj.write(f"=== {timestamp} ===\n")
+        file_obj.write(f"optimizer: {optimizer_description}\n")
+        file_obj.write("mode: xtb\n")
+        file_obj.write(f"split: {split}\n")
+        file_obj.write(f"molecules: {num_molecules}\n")
+        file_obj.write(f"duration: {duration_s:.1f}s\n")
+        file_obj.write(f"results: {len(results)}\n")
+        file_obj.write(f"errors: {len(errors)}\n")
+        for mol_name, message in errors:
+            file_obj.write(f"error: {mol_name}: {message}\n")
+
+        if not results:
+            file_obj.write("outcome: invalid (no results)\n")
+            file_obj.write(json.dumps(score, sort_keys=True) + "\n")
+        else:
+            file_obj.write("molecule\tn_steps\tmax_steps\trel_steps\trel_energy\tconv\n")
+            for result in sorted_results:
+                file_obj.write(
+                    f"{result['mol_name']}\t{result['n_steps']}\t{result['max_steps']}\t"
+                    f"{result['rel_steps']:.6f}\t{result['rel_energy']:.6f}\t"
+                    f"{int(result['converged'])}\n"
+                )
+            file_obj.write(f"mean_rel_steps = {score['mean_rel_steps']:.6f}\n")
+            file_obj.write(f"mean_rel_energy = {score['mean_rel_energy']:.6f}\n")
+            file_obj.write(f"converged = {score['converged']:.4f}\n")
+            file_obj.write(f"is_valid = {score['is_valid']}\n")
+            file_obj.write(json.dumps(score, sort_keys=True) + "\n")
+        file_obj.write("\n")
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Evaluate the editable Sella optimizer.")
-    parser.add_argument("--program", default="sella_tiny.py", help="Optimizer file to evaluate")
+    parser = argparse.ArgumentParser(description="Evaluate the editable optimizer.")
+    parser.add_argument("--program", default="algo.py", help="Optimizer file to evaluate")
     parser.add_argument("--molecules-dir", default=str(REPO_ROOT / "molecules"))
     parser.add_argument("--split", choices=["train", "test"], default="train")
     parser.add_argument("--redis-host", default="localhost")
     parser.add_argument("--redis-port", type=int, default=6379)
+    parser.add_argument("--run-log", default="run.log")
     parser.add_argument("--verbose", action="store_true")
     args = parser.parse_args()
 
-    optimizer_payload = serialize_program_entrypoint(args.program)
-    result = validate(
-        optimizer_payload,
+    optimizer_payload = serialize_program_minimize_func(args.program)
+    optimizer_spec = normalize_optimizer_spec(optimizer_payload)
+    evaluator = Evaluator(
         molecules_dir=args.molecules_dir,
         split=args.split,
         redis_host=args.redis_host,
         redis_port=args.redis_port,
-        verbose=args.verbose,
     )
-    print(json.dumps(result, sort_keys=True))
+    start_time = time.time()
+    result = evaluator.evaluate(optimizer_spec, verbose=args.verbose)
+    duration_s = time.time() - start_time
+    score = score_results(result["results"], result["num_errors"])
+    score["duration_s"] = duration_s
+    score["num_results"] = len(result["results"])
+    score["num_errors"] = result["num_errors"]
+
+    _append_run_log(
+        args.run_log,
+        optimizer_description=describe_optimizer_spec(optimizer_spec),
+        split=args.split,
+        num_molecules=len(evaluator.molecules),
+        duration_s=duration_s,
+        results=result["results"],
+        errors=result["errors"],
+        score=score,
+    )
+
+    line = (
+        f"{datetime.now().isoformat(timespec='seconds')} | {duration_s:>7.1f}s | "
+        f"fitness={score['fitness']:.6f} | mean_rel_steps={score['mean_rel_steps']:.6f} | "
+        f"mean_rel_energy={score['mean_rel_energy']:.6f} | valid={score['is_valid']}"
+    )
+    if score["invalid_reason"]:
+        line += f" | invalid_reason={score['invalid_reason']}"
+    with open(REPO_ROOT / "validate_debug.log", "a", encoding="utf-8") as file_obj:
+        file_obj.write(line + "\n")
 
 
 if __name__ == "__main__":

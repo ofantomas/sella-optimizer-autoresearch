@@ -1,12 +1,12 @@
 # Sella Optimizer Autoresearch
 
-This repository is an autoresearch harness for improving `sella_tiny.py`, a compact Sella-like molecular geometry optimizer. It follows the spirit of [karpathy/autoresearch](https://github.com/karpathy/autoresearch): keep the benchmark fixed, let an LLM edit one file, run the evaluation, and keep only valid improvements.
+This repository is an autoresearch harness for improving `algo.py`, a compact molecular geometry optimizer. It follows the spirit of [karpathy/autoresearch](https://github.com/karpathy/autoresearch): keep the benchmark fixed, let an LLM edit one file, run the evaluation, and keep only valid improvements.
 
-During experiments, `sella_tiny.py` is the only editable source file. The score is `fitness = mean_rel_steps`, where lower is better. A run is invalid unless `mean_rel_energy >= 0.999`; invalid runs receive `fitness = 1000.0` and must be discarded.
+During experiments, `algo.py` is the only editable source file. The score is `fitness = mean_rel_steps`, where lower is better. A run is invalid unless `mean_rel_energy >= 0.999`; invalid runs receive `fitness = 1000.0` and must be discarded.
 
 ## Project Layout
 
-- `sella_tiny.py` - the optimizer under research and the only file agents should edit during experiments.
+- `algo.py` - the optimizer under research and the only file agents should edit during experiments.
 - `program.md` - the main instructions for the research agent, including the metric contract and search policy.
 - `ralph_autoresearch_prompt.md` - the compact prompt passed to Open Ralph Wiggum.
 - `ralph_autoresearch_template.md` - the default Ralph prompt template. It intentionally omits Ralph's completion promise so the agent does not see the sentinel it would need to print to stop the loop.
@@ -60,7 +60,7 @@ Evaluate the current optimizer:
 scripts/run_experiment.sh baseline
 ```
 
-The last JSON line in `run.log` contains `fitness`, `mean_rel_steps`, `mean_rel_energy`, and `is_valid`. `scripts/run_experiment.sh` also appends a row to `results.tsv`.
+`validate.py` appends a structured block to `run.log`; the last JSON line in that block contains `fitness`, `mean_rel_steps`, `mean_rel_energy`, and `is_valid`. During autoresearch, the loop is responsible for appending `results.tsv` and `full_log.md`.
 
 On a remote worker host with this repo cloned and the conda environment active, run:
 
@@ -75,7 +75,7 @@ Use `scripts/babysit_validate.sh` for worker pools. The babysitter respawns each
 Run the autoresearch loop from a research branch in the same checkout. The default launch starts Redis, a babysat 48-worker xTB pool on `localhost:6379`, and Ralph in one tmux session.
 
 ```bash
-git switch -c autoresearch/creative
+git switch -c exp/autoresearch
 rm -f results.tsv
 mkdir -p logs_autoresearch
 LOG="logs_autoresearch/ralph-$(date +%Y%m%d-%H%M%S).log"
@@ -125,4 +125,4 @@ Stop it with:
 tmux kill-session -t sella-ralph-autoresearch
 ```
 
-Ralph relaunches Cursor Agent after each exit. The template hides the completion promise from the agent, while `.cursorignore` and the prompt tell the agent not to inspect Ralph state or log files. The agent is responsible for editing only `sella_tiny.py`, running `REDIS_PORT=6379 scripts/run_experiment.sh "short description"`, committing valid improvements, and discarding invalid or worse experiments.
+Ralph relaunches Cursor Agent after each exit. The template hides the completion promise from the agent, while `.cursorignore` and the prompt tell the agent not to inspect Ralph state or log files. The agent is responsible for editing only `algo.py`, running validation, recording `results.tsv` and `full_log.md`, committing valid improvements, and discarding invalid or worse experiments.
